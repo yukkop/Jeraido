@@ -1,146 +1,125 @@
+use std::env;
+
 use bevy::prelude::*;
-use bevy::render::mesh::{Indices, Mesh, VertexAttributeValues};
-use bevy::render::render_asset::RenderAssetUsages;
-use bevy::render::render_resource::PrimitiveTopology;
-use bevy_editor_pls::prelude::*;
-use bevy_rapier3d::prelude::*;
+use bevy::winit::WinitWindows;
+use winit::window::Icon;
+use bevy_xpbd_3d::prelude::PhysicsPlugins;
+use urmom::core::CorePlugins;
+use urmom::ASSET_DIR;
 
-const CUBE_SIZE: f32 = 1.;
-const HALF_CUBE_SIZE: f32 = CUBE_SIZE / 2.;
-const CUBE_SUBSTITUTIONS: i32 = 2;
-const SUBSTITUTIONS_SIZE: f32 = CUBE_SIZE / CUBE_SUBSTITUTIONS as f32;
-const SUBSTITUTIONS_SIZE_PADDING: f32 = SUBSTITUTIONS_SIZE / 100. * 10.;
-const NATURAL_SUBSTITUTIONS_SIZE: f32 = SUBSTITUTIONS_SIZE / 100. * 90.;
-const HALF_SUBSTITUTIONS_SIZE: f32 = SUBSTITUTIONS_SIZE / 2.;
+/// default value for logging
+///
+/// wgpu_core fluds the logs on info level therefore we need to set it to error
+const RUST_LOG_DEFAULT: &str = "info,wgpu_core=error";
+/// The path to the icon
+const ICON_PATH: &str = "icon-v1.png";
 
-#[derive(Component)]
-struct Sliceble;
+/// The name of the application
+const APP_NAME: &str = "pih-pah";
+
+lazy_static::lazy_static! {
+    /// The current version of the application
+    pub static ref VERSION: String = format!("{}.{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR"), env!("CARGO_PKG_VERSION_PATCH"));
+
+    /// The name of the application with the version
+    pub static ref VERSIONED_APP_NAME: String = format!("{APP_NAME} v{}", *VERSION);
+}
+
+#[cfg(feature = "dev")]
+lazy_static::lazy_static! {
+    /// If the application is running in debug mode
+    pub static ref DEBUG: bool = std::env::var("DEBUG").is_ok();
+}
 
 fn main() {
-    App::new()
-        .add_plugins((
-            DefaultPlugins,
-            EditorPlugin::default(),
-            RapierPhysicsPlugin::<NoUserData>::default(),
-        ))
-        .add_systems(Startup, setup)
-        .add_systems(Update, slice)
-        .run();
-}
+    std::env::set_var(
+        "RUST_LOG",
+        std::env::var("RUST_LOG").unwrap_or(String::from(RUST_LOG_DEFAULT)),
+    );
 
-fn slice(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    keys: Res<ButtonInput<KeyCode>>,
-    query: Query<
-        (
-            Entity,
-            &GlobalTransform,
-            &Handle<Mesh>,
-            &Handle<StandardMaterial>,
-        ),
-        With<Sliceble>,
-    >,
-) {
-    if keys.just_pressed(KeyCode::Space) {
-        for (entity, global_transform, mesh_handle, material_handle) in query.iter() {
-            let Some(mesh) = meshes.get(mesh_handle) else {
-                panic!()
-            };
-            let start_point = global_transform.translation()
-                - Vec3::new(HALF_CUBE_SIZE, HALF_CUBE_SIZE, HALF_CUBE_SIZE);
-            commands.entity(entity).despawn();
+    let mut app = App::new();
 
-            let mesh = Mesh::from(shape::Cube {
-                size: NATURAL_SUBSTITUTIONS_SIZE,
-            });
+    let asset_plugin = AssetPlugin {
+        file_path: ASSET_DIR.into(),
+        ..default()
+    };
 
-            for x in 0..CUBE_SUBSTITUTIONS {
-                for y in 0..CUBE_SUBSTITUTIONS {
-                    for z in 0..CUBE_SUBSTITUTIONS {
-                        commands.spawn((
-                            PbrBundle {
-                                mesh: meshes.add(mesh.clone()),
-                                material: material_handle.clone(),
-                                transform: Transform::from_xyz(
-                                    HALF_SUBSTITUTIONS_SIZE
-                                        + start_point.x
-                                        + SUBSTITUTIONS_SIZE * x as f32,
-                                    HALF_SUBSTITUTIONS_SIZE
-                                        + start_point.y
-                                        + SUBSTITUTIONS_SIZE * y as f32,
-                                    HALF_SUBSTITUTIONS_SIZE
-                                        + start_point.z
-                                        + SUBSTITUTIONS_SIZE * z as f32,
-                                ),
-                                ..default()
-                            },
-                            RigidBody::Dynamic,
-                            Collider::from_bevy_mesh(&mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
-                            Sleeping::disabled(),
-                        ));
-                    }
-                }
-            }
-        }
+    /// Build the app with the default plugins
+    fn default_build(app: &mut App, asset_plugin: AssetPlugin) -> &mut App {
+        let window_plugin_override = WindowPlugin {
+            primary_window: Some(Window {
+                title: VERSIONED_APP_NAME.clone(),
+                //fit_canvas_to_parent: true,
+                prevent_default_event_handling: false,
+                ..default()
+            }),
+            ..default()
+        };
+        app.add_plugins((DefaultPlugins.set(window_plugin_override).set(asset_plugin),))
     }
+
+    #[cfg(not(feature = "dev"))]
+    default_build(&mut app, asset_plugin);
+
+    #[cfg(debug_assertions)]
+    #[cfg(feature = "dev")]
+    if !*DEBUG {
+        default_build(&mut app, asset_plugin);
+    } else {
+        use bevy::window::PresentMode;
+        use bevy::window::WindowResolution;
+        use pih_pah_app::editor::EditorPlugins;
+
+        let window_plugin_override = WindowPlugin {
+            primary_window: Some(Window {
+                title: VERSIONED_APP_NAME.clone(),
+                resolution: WindowResolution::default(),
+                present_mode: PresentMode::AutoNoVsync,
+                // Tells wasm to resize the window according to the available canvas
+                fit_canvas_to_parent: true,
+                // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
+                prevent_default_event_handling: false,
+                ..default()
+            }),
+            ..default()
+        };
+        app.add_plugins((
+            DefaultPlugins.set(window_plugin_override).set(asset_plugin),
+            EditorPlugins,
+        ));
+    }
+
+    // it can be difficult to make physics undependent from the frame rate
+    // but we cannot use FixedUpdate because it is not supported by bevy_xpbd_3d as well as
+    app.add_plugins(PhysicsPlugins::new(Update))
+        .add_systems(Startup, set_window_icon)
+        .add_plugins(CorePlugins);
+
+    info!("Starting {APP_NAME} v{}", *VERSION);
+
+    app.run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    let mesh = Mesh::from(shape::Cube { size: CUBE_SIZE });
+fn set_window_icon(windows: NonSend<WinitWindows>) {
+    let exe_path = env::current_exe().expect("Failed to find executable path");
+    let exe_dir = exe_path
+        .parent()
+        .expect("Failed to find executable directory");
+    let (icon_rgba, icon_width, icon_height) = {
+        if let Ok(image) = image::open(exe_dir.join(ICON_PATH)) {
+            let image = image.into_rgba8();
+            let (width, height) = image.dimensions();
+            let rgba = image.into_raw();
+            (rgba, width, height)
+        } else {
+            // TODO load default icon from url
+            warn!("Failed to load icon");
+            return;
+        }
+    };
+    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height).unwrap();
 
-    // cube
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(mesh.clone()),
-            material: materials.add(Color::rgb_u8(124, 144, 255)),
-            transform: Transform::from_xyz(0.0, 0.5, 0.0),
-            ..default()
-        },
-        Sliceble,
-        RigidBody::Dynamic,
-        Collider::from_bevy_mesh(&mesh, &ComputedColliderShape::TriMesh).unwrap(),
-    ));
-
-    let circle_mesh_handler = meshes.add(Circle::new(4.0));
-
-    // circular base
-    commands.spawn((
-        PbrBundle {
-            mesh: circle_mesh_handler.clone(),
-            material: materials.add(Color::WHITE),
-            transform: Transform::from_rotation(Quat::from_rotation_x(
-                -std::f32::consts::FRAC_PI_2,
-            )),
-            ..default()
-        },
-        RigidBody::Fixed,
-        Collider::from_bevy_mesh(
-            &Mesh::from(Circle::new(4.0)),
-            &ComputedColliderShape::TriMesh,
-        )
-        .unwrap(),
-    ));
-
-    // light
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
-        ..default()
-    });
-
-    // camera
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    for window in windows.windows.values() {
+        window.set_window_icon(Some(icon.clone()));
+    }
 }

@@ -22,14 +22,14 @@
           rustToolchain = (pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml);
 	        nativeBuildInputs = with pkgs; [ rustToolchain pkg-config ];
           buildInputs = with pkgs; [ 
-              udev alsa-lib vulkan-loader
-              xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr # To use the x11 feature
-              libxkbcommon wayland # To use the wayland feature
-	    openssl 
-      alsa-lib
-	    shellcheck
-	    file
-	  ];
+            udev alsa-lib vulkan-loader
+            xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr # To use the x11 feature
+            libxkbcommon wayland # To use the wayland feature
+	          openssl 
+            alsa-lib
+	          shellcheck
+	          file
+	      ];
         in
         with pkgs;
         {
