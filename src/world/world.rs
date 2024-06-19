@@ -2,6 +2,8 @@ use crate::actor::{ActorPlugins, character::CharacterPlugins};
 use crate::component::{AxisName, ComponentPlugins, DespawnReason, NoclipDuration, Respawn};
 use crate::lobby::{Inputs, LobbyPlugins, LobbyState, PlayerInputs};
 use crate::map::MapPlugins;
+use crate::sound::SoundPlugins;
+use crate::ui::UiPlugins;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -64,6 +66,8 @@ impl Plugin for WorldPlugins {
         app.init_resource::<ProjectileIdSeq>()
             .register_type::<ProjectileIdSeq>()
             .add_plugins((
+                UiPlugins,
+                SoundPlugins,
                 MapPlugins,
                 LobbyPlugins,
                 ActorPlugins,
@@ -75,3 +79,7 @@ impl Plugin for WorldPlugins {
 
 #[derive(Component)]
 pub struct Me;
+
+fn init() {
+
+}

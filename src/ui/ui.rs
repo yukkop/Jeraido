@@ -1,12 +1,9 @@
 use crate::ui::menu::MenuPlugins;
-use crate::ui::GameMenuPlugins;
 use crate::util::i18n::{trans, Uniq};
 use bevy::prelude::*;
 use bevy::window::CursorGrabMode;
 use bevy_egui::egui::FontId;
 use std::sync::Arc;
-
-use super::DebugUiPlugins;
 
 #[derive(Debug, Clone, Copy, Resource, PartialEq, Deref, DerefMut)]
 pub struct ViewportRect(egui::Rect);
@@ -57,10 +54,9 @@ pub struct UiPlugins;
 
 impl Plugin for UiPlugins {
     fn build(&self, app: &mut App) {
-        app.add_state::<UiState>()
-            .add_state::<MouseGrabState>()
+        app
             .init_resource::<ViewportRect>()
-            .add_plugins((DebugUiPlugins, MenuPlugins, GameMenuPlugins))
+            .add_plugins(MenuPlugins)
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off);
     }

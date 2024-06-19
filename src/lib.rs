@@ -8,6 +8,8 @@ mod map;
 mod actor;
 mod world;
 mod ui;
+mod settings;
+mod sound;
 
 pub mod core;
 
