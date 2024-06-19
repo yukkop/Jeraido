@@ -2,17 +2,17 @@ use std::env;
 
 use bevy::prelude::*;
 use bevy::winit::WinitWindows;
-use winit::window::Icon;
-use bevy_xpbd_3d::prelude::PhysicsPlugins;
+use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use urmom::core::CorePlugins;
 use urmom::ASSET_DIR;
+use winit::window::Icon;
 
 /// default value for logging
 ///
 /// wgpu_core fluds the logs on info level therefore we need to set it to error
 const RUST_LOG_DEFAULT: &str = "info,wgpu_core=error";
 /// The path to the icon
-const ICON_PATH: &str = "icon-v1.png";
+const ICON_PATH: &str = "icon.png";
 
 /// The name of the application
 const APP_NAME: &str = "pih-pah";
@@ -55,7 +55,10 @@ fn main() {
             }),
             ..default()
         };
-        app.add_plugins((DefaultPlugins.set(window_plugin_override).set(asset_plugin),))
+        app.add_plugins((
+            DefaultPlugins.set(window_plugin_override).set(asset_plugin),
+            RapierPhysicsPlugin::<NoUserData>::default(),
+        ))
     }
 
     #[cfg(not(feature = "dev"))]
@@ -68,6 +71,7 @@ fn main() {
     } else {
         use bevy::window::PresentMode;
         use bevy::window::WindowResolution;
+        use bevy_rapier3d::render::RapierDebugRenderPlugin;
         use pih_pah_app::editor::EditorPlugins;
 
         let window_plugin_override = WindowPlugin {
@@ -85,13 +89,15 @@ fn main() {
         };
         app.add_plugins((
             DefaultPlugins.set(window_plugin_override).set(asset_plugin),
-            EditorPlugins,
+            RapierPhysicsPlugin::<NoUserData>::default(),
+            RapierDebugRenderPlugin::default(),
+            EditorPlugins::default(),
         ));
     }
 
     // it can be difficult to make physics undependent from the frame rate
     // but we cannot use FixedUpdate because it is not supported by bevy_xpbd_3d as well as
-    app.add_plugins(PhysicsPlugins::new(Update))
+    app
         .add_systems(Startup, set_window_icon)
         .add_plugins(CorePlugins);
 

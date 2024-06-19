@@ -1,7 +1,6 @@
 use bevy::{app::{App, Plugin}, ecs::{system::Resource, schedule::States}, a11y::accesskit::Action, input::keyboard::KeyCode};
 use bevy_controls::{resource::{PlayerActions, BindingConfig, Binding, InputType, AxisName, MouseInput, Controls}, contract::InputsContainer, plugin::ControlsPlugin};
 use bevy_controls_derive::{GameState, Action};
-use bevy_rapier3d::{plugin::RapierPhysicsPlugin, render::RapierDebugRenderPlugin};
 use strum_macros::EnumIter;
 
 #[derive(PartialEq, Eq, Hash, EnumIter, Clone, Copy, Debug, Action)]
@@ -18,9 +17,9 @@ pub enum CoreAction {
 
 #[derive(States, PartialEq, Eq, Clone, Hash, Debug, Default, GameState)]
 pub enum CoreGameState {
+    Arena,
     #[default]
-    InGame,
-    Menu,
+    Hub,
 }
 
 #[derive(Resource, Default, Clone, Debug)]
