@@ -2,6 +2,7 @@ use std::env;
 
 use bevy::prelude::*;
 use bevy::winit::WinitWindows;
+use bevy_egui::EguiPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use urmom::core::CorePlugins;
 use urmom::ASSET_DIR;
@@ -99,7 +100,7 @@ fn main() {
     // but we cannot use FixedUpdate because it is not supported by bevy_xpbd_3d as well as
     app
         .add_systems(Startup, set_window_icon)
-        .add_plugins(CorePlugins);
+        .add_plugins((EguiPlugin, CorePlugins));
 
     info!("Starting {APP_NAME} v{}", *VERSION);
 

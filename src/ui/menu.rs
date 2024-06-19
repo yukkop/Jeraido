@@ -51,6 +51,7 @@ pub struct MenuPlugins;
 impl Plugin for MenuPlugins {
     fn build(&self, app: &mut App) {
         app.init_resource::<State>()
+            .insert_state(WindowState::default())
             .add_systems(Update, menu.run_if(in_state(UiState::Menu)))
             .add_systems(
                 Update,

@@ -55,6 +55,8 @@ pub struct UiPlugins;
 impl Plugin for UiPlugins {
     fn build(&self, app: &mut App) {
         app
+            .insert_state(UiState::default())
+            .insert_state(MouseGrabState::default())
             .init_resource::<ViewportRect>()
             .add_plugins(MenuPlugins)
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)

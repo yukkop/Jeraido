@@ -2,6 +2,7 @@ use crate::actor::{ActorPlugins, character::CharacterPlugins};
 use crate::component::{AxisName, ComponentPlugins, DespawnReason, NoclipDuration, Respawn};
 use crate::lobby::{Inputs, LobbyPlugins, LobbyState, PlayerInputs};
 use crate::map::MapPlugins;
+use crate::settings::SettingsPlugins;
 use crate::sound::SoundPlugins;
 use crate::ui::UiPlugins;
 use bevy::prelude::*;
@@ -66,14 +67,14 @@ impl Plugin for WorldPlugins {
         app.init_resource::<ProjectileIdSeq>()
             .register_type::<ProjectileIdSeq>()
             .add_plugins((
-                UiPlugins,
+                SettingsPlugins,
                 SoundPlugins,
                 MapPlugins,
+                UiPlugins,
                 LobbyPlugins,
                 ActorPlugins,
                 ComponentPlugins,
-                CharacterPlugins,
-            ));
+      ));
     }
 }
 

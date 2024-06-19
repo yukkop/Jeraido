@@ -9,16 +9,12 @@ use crate::world::SpawnPoint;
 pub enum MapState {
     #[default]
     Menu = 0,
-    ShootingRange = 1,
-    GravityHell = 2,
 }
 
 impl Display for MapState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MapState::Menu => write!(f, "Menu"),
-            MapState::ShootingRange => write!(f, "ShootingRange"),
-            MapState::GravityHell => write!(f, "GravityHell"),
         }
     }
 }
@@ -32,6 +28,7 @@ pub struct MapPlugins;
 impl Plugin for MapPlugins {
     fn build(&self, app: &mut App) {
         app
+            .insert_state(MapState::default())
             .init_resource::<SpawnPoint>()
             .add_plugins(());
     }

@@ -408,6 +408,8 @@ pub struct LobbyPlugins;
 impl Plugin for LobbyPlugins {
     fn build(&self, app: &mut App) {
         app.add_event::<ChangeMapLobbyEvent>()
+            .insert_state(LobbyState::default())
+            .insert_state(MapLoaderState::default())
             .init_resource::<HostResource>()
             .init_resource::<ClientResource>()
             .add_plugins((

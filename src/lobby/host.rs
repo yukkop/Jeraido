@@ -127,7 +127,7 @@ fn setup(
     commands.insert_resource(server);
     commands.insert_resource(transport);
 
-    change_map_event.send(ChangeMapLobbyEvent(MapState::ShootingRange));
+    change_map_event.send(ChangeMapLobbyEvent(MapState::Menu));
 }
 
 pub fn load_processing(
