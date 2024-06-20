@@ -15,7 +15,7 @@ use egui_dock::{DockArea, DockState, NodeIndex, Style};
 use egui_gizmo::{Gizmo, GizmoMode, GizmoOrientation};
 
 use crate::component::Respawn;
-use crate::lobby::{Inputs, PlayerView};
+use crate::lobby::PlayerView;
 use crate::util::i18n::Uniq;
 
 use super::{rich_text, MainCamera, ViewportRect};
@@ -72,7 +72,7 @@ pub struct DebugUiPlugins;
 
 impl Plugin for DebugUiPlugins {
     fn build(&self, app: &mut App) {
-        app.register_type::<Inputs>()
+        app
             .register_type::<PlayerView>()
             .register_type::<Respawn>()
             .add_event::<DebugMenuEvent>()

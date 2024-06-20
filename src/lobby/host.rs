@@ -1,9 +1,10 @@
 use std::net::UdpSocket;
 use std::time::SystemTime;
 
-use crate::actor::UnloadActorsEvent;
 use crate::actor::character::{spawn_character, spawn_tied_camera, TiedCamera};
+use crate::actor::UnloadActorsEvent;
 use crate::component::{DespawnReason, Respawn};
+use crate::core::CoreAction;
 use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
 use crate::map::{is_loaded, MapState};
 use crate::world::{LinkId, Me, SpawnPoint};
@@ -17,14 +18,15 @@ use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::log::info;
 use bevy::prelude::{in_state, Color, Commands, IntoSystemConfigs, OnEnter};
 use bevy::transform::components::Transform;
+use bevy_controls::resource::PlayerActions;
 use bevy_renet::transport::NetcodeServerPlugin;
 use bevy_renet::RenetServerPlugin;
 use renet::transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig};
 use renet::{ConnectionConfig, DefaultChannel, RenetServer, ServerEvent};
 
 use super::{
-    ActorTransportData, ChangeMapLobbyEvent, Character, HostResource, Inputs, Lobby,
-    MapLoaderState, PlayerInputs, PlayerTransportData, PlayerView, TransportDataResource,
+    ChangeMapLobbyEvent, Character, HostResource, Lobby,
+    MapLoaderState, PlayerTransportData, PlayerView, TransportDataResource,
     PROTOCOL_ID,
 };
 
@@ -53,8 +55,7 @@ impl Plugin for HostLobbyPlugins {
             )
             .add_systems(
                 Update,
-                server_update_system
-                    .run_if(in_state(LobbyState::Host)),
+                server_update_system.run_if(in_state(LobbyState::Host)),
             )
             .add_systems(OnExit(LobbyState::Host), teardown)
             .add_systems(
@@ -152,14 +153,15 @@ pub fn load_processing(
                 .id();
             commands.spawn_tied_camera(player_entity);
 
-            lobby_res.players.insert(
-                PlayerId::HostOrSingle,
-                PlayerData {
-                    entity: player_entity,
-                    color,
-                    username: host_resource.username.clone().unwrap(),
-                },
-            );
+            // TODO:
+            //lobby_res.players.insert(
+            //    PlayerId::HostOrSingle,
+            //    PlayerData {
+            //        entity: player_entity,
+            //        color,
+            //        username: host_resource.username.clone().unwrap(),
+            //    },
+            //);
         }
 
         for mut respawn in character_respawn_query.iter_mut() {
@@ -220,7 +222,7 @@ pub fn server_update_system(
     spawn_point: Res<SpawnPoint>,
     map_state: ResMut<State<MapState>>,
 
-    mut input_query: Query<&mut PlayerInputs>,
+    //mut input_query: Query<&mut PlayerInputs>,
 ) {
     for event in server_events.read() {
         match event {
@@ -268,11 +270,7 @@ pub fn server_update_system(
 
                 lobby.players.insert(
                     PlayerId::Client(*client_id),
-                    PlayerData {
-                        entity: player_entity,
-                        color,
-                        username: username.clone(),
-                    },
+                    PlayerData::new(player_entity, color, username.clone()),
                 );
 
                 let message = bincode::serialize(&ServerMessages::PlayerConnected {
@@ -286,7 +284,7 @@ pub fn server_update_system(
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 log::info!("Player {} disconnected: {}", client_id, reason);
                 if let Some(player_data) = lobby.players.remove(&PlayerId::Client(*client_id)) {
-                    commands.entity(player_data.entity).despawn();
+                    commands.entity(player_data.entity()).despawn();
                 }
 
                 let message = bincode::serialize(&ServerMessages::PlayerDisconnected {
@@ -302,16 +300,17 @@ pub fn server_update_system(
         let mut first = true;
         while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
         {
-            let input: Inputs = bincode::deserialize(&message).unwrap();
+            //let input: Inputs = bincode::deserialize(&message).unwrap();
             if let Some(player_data) = lobby.players.get(&PlayerId::Client(client_id)) {
-                if let Ok(mut player_input) = input_query.get_mut(player_data.entity) {
-                    if first {
-                        player_input.insert_inputs(input);
-                        first = false;
-                    } else {
-                        player_input.add(input);
-                    }
-                }
+                // TODO:
+                // if let Ok(mut player_input) = input_query.get_mut(player_data.entity()) {
+                //     if first {
+                //         player_input.insert_inputs(input);
+                //         first = false;
+                //     } else {
+                //         player_input.add(input);
+                //     }
+                // }
             } else {
                 log::error!("Player not found");
             }
@@ -337,7 +336,7 @@ pub fn server_update_system(
 //             },
 //         );
 //     }
-// 
+//
 //     for (transform, link_id) in moveble_actor_query.iter() {
 //         data.actors.insert(
 //             link_id.clone(),
@@ -347,10 +346,10 @@ pub fn server_update_system(
 //             },
 //         );
 //     }
-// 
+//
 //     let sync_message = bincode::serialize(&data).unwrap();
 //     server.broadcast_message(DefaultChannel::Unreliable, sync_message);
-// 
+//
 //     data.players.clear();
 //     data.actors.clear();
 // }

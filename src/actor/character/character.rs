@@ -2,13 +2,11 @@ use std::f32::consts::PI;
 
 use crate::component::{AxisName, DespawnReason, NoclipDuration, Respawn};
 use crate::extend_commands;
-use crate::lobby::host::{generate_player_color, server_update_system};
-use crate::lobby::{Character, InputType, PlayerInputs};
+use crate::lobby::Character;
 use crate::lobby::{LobbyState, PlayerId, PlayerView};
 use crate::world::SpawnPoint;
 use crate::world::MainCamera;
 use crate::world::Me;
-use bevy::ecs::query::QueryFilter;
 use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_rapier3d::dynamics::Velocity;
 use serde::{Deserialize, Serialize};
@@ -141,81 +139,84 @@ fn tied_camera_follow(
 //}
 
 fn move_characters(
-    mut query: Query<(&mut Velocity, &PlayerView, &PlayerInputs)>, /* , time: Res<Time> */
+    // mut query: Query<(&mut Velocity, &PlayerView, &PlayerInputs)>, /* , time: Res<Time> */
 ) {
-    for (mut velocity, view_direction, input) in query.iter_mut() {
-        let input = input.get();
-        let dx = (input.right as i8 - input.left as i8) as f32;
-        let dy = (input.down as i8 - input.up as i8) as f32;
+    // TODO:
+    //for (mut velocity, view_direction, input) in query.iter_mut() {
+    //    let input = input.get();
+    //    let dx = (input.right as i8 - input.left as i8) as f32;
+    //    let dy = (input.down as i8 - input.up as i8) as f32;
 
-        // convert axises to global
-        let view_direction_x = view_direction.direction.mul_vec3(Vec3::X);
-        let view_direction_y = view_direction.direction.mul_vec3(Vec3::Z);
+    //    // convert axises to global
+    //    let view_direction_x = view_direction.direction.mul_vec3(Vec3::X);
+    //    let view_direction_y = view_direction.direction.mul_vec3(Vec3::Z);
 
-        // never use delta time in fixed update !!!
-        let shift_acceleration = SHIFT_ACCELERATION.powf(input.sprint as i32 as f32);
+    //    // never use delta time in fixed update !!!
+    //    let shift_acceleration = SHIFT_ACCELERATION.powf(input.sprint as i32 as f32);
 
-        // move by x axis
-        velocity.linvel.x += dx * PLAYER_MOVE_SPEED * view_direction_x.x * shift_acceleration;
-        velocity.linvel.z += dx * PLAYER_MOVE_SPEED * view_direction_x.z * shift_acceleration;
+    //    // move by x axis
+    //    velocity.linvel.x += dx * PLAYER_MOVE_SPEED * view_direction_x.x * shift_acceleration;
+    //    velocity.linvel.z += dx * PLAYER_MOVE_SPEED * view_direction_x.z * shift_acceleration;
 
-        // move by y axis
-        velocity.linvel.x += dy * PLAYER_MOVE_SPEED * view_direction_y.x * shift_acceleration;
-        velocity.linvel.z += dy * PLAYER_MOVE_SPEED * view_direction_y.z * shift_acceleration;
-    }
+    //    // move by y axis
+    //    velocity.linvel.x += dy * PLAYER_MOVE_SPEED * view_direction_y.x * shift_acceleration;
+    //    velocity.linvel.z += dy * PLAYER_MOVE_SPEED * view_direction_y.z * shift_acceleration;
+    //}
 }
 
 #[allow(clippy::type_complexity)]
 fn rotate_camera(
-    mut query: Query<(
-        &mut PlayerView,
-        &Transform,
-        &PlayerInputs,
-        //Option<&mut RayCaster>,
-        //Option<&RayHits>,
-    )>,
-    time: Res<Time>,
+    // TODO:
+    //mut query: Query<(
+    //    &mut PlayerView,
+    //    &Transform,
+    //    &PlayerInputs,
+    //    //Option<&mut RayCaster>,
+    //    //Option<&RayHits>,
+    //)>,
+    //time: Res<Time>,
 ) {
-    let delta_seconds = time.delta_seconds();
-    for (mut view, transform, input) in query.iter_mut() {
-        let input = input.get();
+    // TODO:
+    //let delta_seconds = time.delta_seconds();
+    //for (mut view, transform, input) in query.iter_mut() {
+    //    let input = input.get();
 
-        // camera turn
-        let rotation = Quat::from_rotation_y(input.turn_horizontal * SENSITIVITY * delta_seconds);
-        // global rotation (!ORDER OF MULTIPLICATION MATTERS!)
-        view.direction = rotation * view.direction;
+    //    // camera turn
+    //    let rotation = Quat::from_rotation_y(input.turn_horizontal * SENSITIVITY * delta_seconds);
+    //    // global rotation (!ORDER OF MULTIPLICATION MATTERS!)
+    //    view.direction = rotation * view.direction;
 
-        let rotation = Quat::from_rotation_x(input.turn_vertical * SENSITIVITY * delta_seconds);
-        // local rotation (!ORDER OF MULTIPLICATION MATTERS!)
-        view.direction *= rotation;
+    //    let rotation = Quat::from_rotation_x(input.turn_vertical * SENSITIVITY * delta_seconds);
+    //    // local rotation (!ORDER OF MULTIPLICATION MATTERS!)
+    //    view.direction *= rotation;
 
-        view.distance = DEFAULT_CAMERA_DISTANCE;
+    //    view.distance = DEFAULT_CAMERA_DISTANCE;
 
-        // TODO:
-        // let ray_pos = Vec3::new(1.0, 2.0, 3.0);
-        // let ray_dir = Vec3::new(0.0, 1.0, 0.0);
-        // let max_toi = 4.0;
-        // let solid = true;
-        // let filter = QueryFilter::default();
-        // //rapier_context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter) 
-        // 
-        // if let (Some(hits), Some(mut ray)) = (hits, ray) {
-        //     let h = transform.rotation.conjugate();
-        //     let start_point = h.mul_vec3(Vec3::Y * 2.);
-        //     let offset = h
-        //         .mul_vec3(view.direction.mul_vec3(DEFAULT_CAMERA_DISTANCE * Vec3::Z))
-        //         // need to normalize ray.direction to time_of_impact work correctly
-        //         .normalize();
-        //     ray.origin = start_point;
-        //     ray.direction = offset;
-        // 
-        //     if let Some(firs_hit) = hits.iter_sorted().next() {
-        //         if firs_hit.time_of_impact < DEFAULT_CAMERA_DISTANCE {
-        //             view.distance = firs_hit.time_of_impact;
-        //         }
-        //     }
-        // }
-    }
+    //    // TODO:
+    //    // let ray_pos = Vec3::new(1.0, 2.0, 3.0);
+    //    // let ray_dir = Vec3::new(0.0, 1.0, 0.0);
+    //    // let max_toi = 4.0;
+    //    // let solid = true;
+    //    // let filter = QueryFilter::default();
+    //    // //rapier_context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter) 
+    //    // 
+    //    // if let (Some(hits), Some(mut ray)) = (hits, ray) {
+    //    //     let h = transform.rotation.conjugate();
+    //    //     let start_point = h.mul_vec3(Vec3::Y * 2.);
+    //    //     let offset = h
+    //    //         .mul_vec3(view.direction.mul_vec3(DEFAULT_CAMERA_DISTANCE * Vec3::Z))
+    //    //         // need to normalize ray.direction to time_of_impact work correctly
+    //    //         .normalize();
+    //    //     ray.origin = start_point;
+    //    //     ray.direction = offset;
+    //    // 
+    //    //     if let Some(firs_hit) = hits.iter_sorted().next() {
+    //    //         if firs_hit.time_of_impact < DEFAULT_CAMERA_DISTANCE {
+    //    //             view.distance = firs_hit.time_of_impact;
+    //    //         }
+    //    //     }
+    //    // }
+    //}
 }
 
 extend_commands!(
@@ -254,7 +255,7 @@ extend_commands!(
             ),
             SpawnPoint::new(spawn_point),
             NoclipDuration::Timer(10.)),
-            PlayerInputs::default(),
+            // TODO: PlayerInputs::default(),
             Character { id: player_id },
             PlayerView::new(Quat::default(), 325_f32.sqrt()),
             Name::new(format!("Character:{:#?}", player_id)),
@@ -296,7 +297,7 @@ extend_commands!(
           ..Default::default()
        },
         // TransformOptimalTrace::new(0.5, 0.05, color, PLAYER_SIZE / 2.),
-        PlayerInputs::default(),
+        // TODO: PlayerInputs::default(),
         Name::new(format!("Character:{:#?}", player_id)),
         PlayerView::new(Quat::default(), 325_f32.sqrt())));
   }

@@ -13,7 +13,7 @@ use bevy_controls::{
         Binding, BindingCondition, BindingConfig, Controls, InputType },
 };
 
-use crate::{ui::{GameMenuActionState, MouseGrabState}, core::{CoreAction, Lobby, CoreGameState}};
+use crate::{ui::{GameMenuActionState, MouseGrabState}, core::{CoreAction, CoreGameState}, lobby::Lobby};
 
 /// Main plugin of the game
 pub struct ControlsPlugins;

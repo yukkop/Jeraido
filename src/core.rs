@@ -1,4 +1,3 @@
-
 use bevy::prelude::*;
 use bevy_controls::{resource::PlayerActions, contract::InputsContainer};
 use bevy_controls_derive::{Action, GameState};
@@ -16,26 +15,6 @@ pub enum CoreGameState {
     InGame,
     #[default]
     Hub,
-}
-
-#[derive(Resource, Default, Clone, Debug)]
-pub struct Lobby {
-    // When the game does not provide multiplayer, one field is enough
-    player_inputs: PlayerActions<CoreAction>,
-}
-
-impl InputsContainer<CoreAction> for Lobby {
-    fn iter_inputs<'a>(&'a self) -> Box<dyn Iterator<Item = &'a PlayerActions<CoreAction>> + 'a> {
-        todo!()
-    }
-
-    fn me<'a>(&'a self) -> Option<&'a PlayerActions<CoreAction>> {
-        Some(&self.player_inputs)
-    }
-
-    fn me_mut<'a>(&'a mut self) -> Option<&'a mut PlayerActions<CoreAction>> {
-        Some(&mut self.player_inputs)
-    }
 }
 
 

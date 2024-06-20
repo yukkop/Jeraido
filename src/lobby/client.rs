@@ -1,8 +1,8 @@
 use std::net::UdpSocket;
 use std::time::SystemTime;
 
-use crate::actor::UnloadActorsEvent;
 use crate::actor::character::{spawn_character_shell, spawn_tied_camera, TiedCamera};
+use crate::actor::UnloadActorsEvent;
 use crate::lobby::{LobbyState, PlayerId};
 use crate::map::MapState;
 use crate::world::{LinkId, Me};
@@ -25,7 +25,7 @@ use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 pub struct OwnId(Option<ClientId>);
 
 use super::{
-    ClientResource, Lobby, PlayerData, PlayerInputs, ServerMessages, TransportDataResource,
+    ClientResource, Lobby, PlayerData, ServerMessages, TransportDataResource,
     Username, PROTOCOL_ID,
 };
 
@@ -37,7 +37,7 @@ impl Plugin for ClientLobbyPlugins {
             .add_systems(OnEnter(LobbyState::Client), (setup, new_renet_client))
             .add_systems(
                 Update,
-                (client_send_input, client_sync_players)
+                client_sync_players
                     .run_if(in_state(LobbyState::Client).and_then(bevy_renet::client_connected)),
             )
             .add_systems(OnExit(LobbyState::Client), teardown);
@@ -71,15 +71,16 @@ pub fn new_renet_client(settings: Res<ClientResource>, mut commands: Commands) {
     );
 }
 
-pub fn client_send_input(
-    mut player_input_query: Query<&mut PlayerInputs, With<Me>>,
-    mut client: ResMut<RenetClient>,
-) {
-    if let Ok(player_input) = player_input_query.get_single_mut() {
-        let input_message = bincode::serialize(&player_input.get()).unwrap();
-        client.send_message(DefaultChannel::ReliableOrdered, input_message);
-    }
-}
+// TODO:
+//pub fn client_send_input(
+//    mut player_input_query: Query<&mut PlayerInputs, With<Me>>,
+//    mut client: ResMut<RenetClient>,
+//) {
+//    if let Ok(player_input) = player_input_query.get_single_mut() {
+//        let input_message = bincode::serialize(&player_input.get()).unwrap();
+//        client.send_message(DefaultChannel::ReliableOrdered, input_message);
+//    }
+//}
 
 fn setup(mut commands: Commands) {
     // me
@@ -95,20 +96,21 @@ fn setup(mut commands: Commands) {
 fn teardown(
     mut commands: Commands,
     tied_camera_query: Query<Entity, With<TiedCamera>>,
-    char_query: Query<Entity, With<PlayerInputs>>,
+    // char_query: Query<Entity, With<PlayerInputs>>,
     mut unload_actors_event: EventWriter<UnloadActorsEvent>,
 ) {
-    for entity in tied_camera_query.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-    for entity in char_query.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-    commands.remove_resource::<Lobby>();
-    commands.remove_resource::<OwnId>();
-    commands.remove_resource::<TransportDataResource>();
+    // TODO:
+    //for entity in tied_camera_query.iter() {
+    //    commands.entity(entity).despawn_recursive();
+    //}
+    //for entity in char_query.iter() {
+    //    commands.entity(entity).despawn_recursive();
+    //}
+    //commands.remove_resource::<Lobby>();
+    //commands.remove_resource::<OwnId>();
+    //commands.remove_resource::<TransportDataResource>();
 
-    unload_actors_event.send(UnloadActorsEvent);
+    //unload_actors_event.send(UnloadActorsEvent);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -158,21 +160,16 @@ pub fn client_sync_players(
                     log::info!("Host {} ({:?}).", username, player_id);
                 }
 
-                lobby.players.insert(
-                    player_id,
-                    PlayerData {
-                        entity: player_entity,
-                        color,
-                        username,
-                    },
-                );
+                lobby
+                    .players
+                    .insert(player_id, PlayerData::new(player_entity, color, username));
             }
             ServerMessages::PlayerDisconnected { id } => {
                 let name = "noname";
 
                 log::info!("Player {} ({:?}) disconnected.", name, id);
                 if let Some(player_data) = lobby.players.remove(&id) {
-                    commands.entity(player_data.entity).despawn();
+                    commands.entity(player_data.entity()).despawn();
                 }
             }
             ServerMessages::ActorDespawn { id } => {
@@ -198,7 +195,7 @@ pub fn client_sync_players(
                 };
                 // TODO: why transform to default?
                 commands
-                    .entity(player_data.entity)
+                    .entity(player_data.entity())
                     .insert(transform)
                     .insert(data.player_view);
             }

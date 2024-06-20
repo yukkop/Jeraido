@@ -1,3 +1,4 @@
+use crate::core::CoreAction;
 use crate::map::MapState;
 use crate::world::LinkId;
 use bevy::app::{App, Plugin};
@@ -5,12 +6,17 @@ use bevy::ecs::event::Event;
 use bevy::math::{Quat, Vec3};
 use bevy::prelude::{Color, Component, Entity, Resource, States};
 use bevy::reflect::Reflect;
+use bevy_controls::contract::InputsContainer;
+use bevy_controls::resource::PlayerActions;
 use renet::transport::NETCODE_USER_DATA_BYTES;
 use renet::ClientId;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::rc::Rc;
 
+use super::client::ClientLobbyPlugins;
 use super::host::HostLobbyPlugins;
+use super::single::SingleLobbyPlugins;
 
 //use super::host::HostLobbyPlugins;
 //use super::single::SingleLobbyPlugins;
@@ -148,15 +154,32 @@ pub struct HostResource {
     pub username: Option<String>,
 }
 
-#[derive(Debug, Default, Resource)]
+#[derive(Resource, Default, Clone, Debug)]
 pub struct Lobby {
+    // When the game does not provide multiplayer, one field is enough
+    pub me: PlayerData,
     pub players: HashMap<PlayerId, PlayerData>,
     pub players_seq: usize,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
+impl InputsContainer<CoreAction> for Lobby {
+    fn iter_inputs<'a>(&'a self) -> Box<dyn Iterator<Item = &'a PlayerActions<CoreAction>> + 'a> {
+        todo!()
+    }
+
+    fn me<'a>(&'a self) -> Option<&'a PlayerActions<CoreAction>> {
+        Some(&self.me.inputs)
+    }
+
+    fn me_mut<'a>(&'a mut self) -> Option<&'a mut PlayerActions<CoreAction>> {
+        Some(&mut self.me.inputs)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize, Default)]
 pub enum PlayerId {
-    HostOrSingle,
+    #[default]
+    HostOrSingle, // TODO: depricated
     Client(ClientId),
 }
 
@@ -169,191 +192,41 @@ impl PlayerId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PlayerData {
-    pub entity: Entity,
+    entity: Option<Entity>,
     pub color: Color,
     pub username: String,
+    pub inputs: PlayerActions<CoreAction>,
 }
 
-// TODO resource????????
-#[derive(Debug, Default, Component, Reflect)]
-pub struct PlayerInputs {
-    input: Inputs,
-    previouse_input: Inputs,
+impl PlayerData {
+  pub fn new(entity: Entity, color: Color, username: String) -> PlayerData {
+      PlayerData {
+        entity: Some(entity),
+        color, 
+        username,
+        inputs: PlayerActions::<CoreAction>::default(),
+      }
+  }
+
+  pub fn entity(&self) -> Entity {
+    match self.entity {
+      Some(entity) => entity,
+      None => panic!(),
+    }
+  }
 }
 
-pub enum InputValue {
-    Boolean(bool),
-    Float(f32),
-}
-
-pub const THRESHOLD: f32 = 0.1;
-
-impl PlayerInputs {
-    pub fn insert_inputs(&mut self, input: Inputs) {
-        self.previouse_input = self.input;
-        self.input = input;
+impl Default for PlayerData {
+    fn default() -> Self {
+      PlayerData {
+        entity: None,
+        color: Color::RED, 
+        username: "noname".into(),
+        inputs: PlayerActions::<CoreAction>::default(),
+      }
     }
-
-    pub fn add(&mut self, input: Inputs) {
-        self.input.up |= input.up;
-        self.input.down |= input.down;
-        self.input.left |= input.left;
-        self.input.right |= input.right;
-        self.input.jump |= input.jump;
-        self.input.sprint |= input.sprint;
-        self.input.turn_horizontal += input.turn_horizontal;
-        self.input.turn_vertical += input.turn_vertical;
-        self.input.special |= input.special;
-        self.input.fire |= input.fire;
-    }
-
-    pub fn get(&self) -> Inputs {
-        self.input
-    }
-
-    pub fn is_input_changed(&self, input_type: InputType) -> bool {
-        match input_type {
-            InputType::Up => self.input.up != self.previouse_input.up,
-            InputType::Down => self.input.down != self.previouse_input.down,
-            InputType::Left => self.input.left != self.previouse_input.left,
-            InputType::Right => self.input.right != self.previouse_input.right,
-            InputType::Jump => self.input.jump != self.previouse_input.jump,
-            InputType::Sprint => self.input.sprint != self.previouse_input.sprint,
-            InputType::TurnHorizontal => {
-                self.input.turn_horizontal != self.previouse_input.turn_horizontal
-            }
-            InputType::TurnVertical => {
-                self.input.turn_vertical != self.previouse_input.turn_vertical
-            }
-            InputType::Special => self.input.special != self.previouse_input.special,
-            InputType::Fire => self.input.fire != self.previouse_input.fire,
-        }
-    }
-
-    pub fn is_input_changed_to_true(&self, input_type: InputType) -> bool {
-        match input_type {
-            InputType::Up => !self.previouse_input.up && self.input.up,
-            InputType::Down => !self.previouse_input.down && self.input.down,
-            InputType::Left => !self.previouse_input.left && self.input.left,
-            InputType::Right => !self.previouse_input.right && self.input.right,
-            InputType::Jump => !self.previouse_input.jump && self.input.jump,
-            InputType::Sprint => !self.previouse_input.sprint && self.input.sprint,
-            InputType::TurnHorizontal => {
-                self.input.turn_horizontal - self.previouse_input.turn_horizontal > THRESHOLD
-            }
-            InputType::TurnVertical => {
-                self.input.turn_vertical - self.previouse_input.turn_vertical > THRESHOLD
-            }
-            InputType::Special => !self.previouse_input.special && self.input.special,
-            InputType::Fire => !self.previouse_input.fire && self.input.fire,
-        }
-    }
-
-    pub fn is_input_changed_to_true_and_set_to_false(&mut self, input_type: InputType) -> bool {
-        match input_type {
-            InputType::Up => {
-                let val = !self.previouse_input.up && self.input.up;
-                if val {
-                    self.previouse_input.up = true;
-                }
-                val
-            }
-            InputType::Down => {
-                let val = !self.previouse_input.down && self.input.down;
-                if val {
-                    self.previouse_input.down = true;
-                }
-                val
-            }
-            InputType::Left => {
-                let val = !self.previouse_input.left && self.input.left;
-                if val {
-                    self.previouse_input.left = true;
-                }
-                val
-            }
-            InputType::Right => {
-                let val = !self.previouse_input.right && self.input.right;
-                if val {
-                    self.previouse_input.right = true;
-                }
-                val
-            }
-            InputType::Jump => {
-                let val = !self.previouse_input.jump && self.input.jump;
-                if val {
-                    self.previouse_input.jump = true;
-                }
-                val
-            }
-            InputType::Sprint => {
-                let val = !self.previouse_input.sprint && self.input.sprint;
-                if val {
-                    self.previouse_input.sprint = true;
-                }
-                val
-            }
-            InputType::TurnHorizontal => {
-                let val =
-                    self.input.turn_horizontal - self.previouse_input.turn_horizontal > THRESHOLD;
-                if val {
-                    self.previouse_input.turn_horizontal = 0.2;
-                }
-                val
-            }
-            InputType::TurnVertical => {
-                let val = self.input.turn_vertical - self.previouse_input.turn_vertical > THRESHOLD;
-                if val {
-                    self.previouse_input.turn_vertical = 0.2;
-                }
-                val
-            }
-            InputType::Special => {
-                let val = !self.previouse_input.special && self.input.special;
-                if val {
-                    self.previouse_input.special = true;
-                }
-                val
-            }
-            InputType::Fire => {
-                let val = !self.previouse_input.fire && self.input.fire;
-                if val {
-                    self.previouse_input.fire = true;
-                }
-                val
-            }
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum InputType {
-    Up,
-    Down,
-    Left,
-    Right,
-    Jump,
-    Sprint,
-    TurnHorizontal,
-    TurnVertical,
-    Special,
-    Fire,
-}
-
-#[derive(Debug, Default, Serialize, Deserialize, Reflect, Clone, Copy)]
-pub struct Inputs {
-    pub up: bool,
-    pub down: bool,
-    pub left: bool,
-    pub right: bool,
-    pub jump: bool,
-    pub sprint: bool,
-    pub turn_horizontal: f32,
-    pub turn_vertical: f32,
-    pub special: bool,
-    pub fire: bool,
 }
 
 #[derive(Debug, Component)]
@@ -414,8 +287,8 @@ impl Plugin for LobbyPlugins {
             .init_resource::<ClientResource>()
             .add_plugins((
                 HostLobbyPlugins,
-                // SingleLobbyPlugins,
-                // ClientLobbyPlugins
+                SingleLobbyPlugins,
+                ClientLobbyPlugins,
             ));
     }
 }
