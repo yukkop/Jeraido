@@ -5,6 +5,8 @@ use bevy::window::CursorGrabMode;
 use bevy_egui::egui::FontId;
 use std::sync::Arc;
 
+use super::GameMenuPlugins;
+
 #[derive(Debug, Clone, Copy, Resource, PartialEq, Deref, DerefMut)]
 pub struct ViewportRect(egui::Rect);
 
@@ -58,7 +60,7 @@ impl Plugin for UiPlugins {
             .insert_state(UiState::default())
             .insert_state(MouseGrabState::default())
             .init_resource::<ViewportRect>()
-            .add_plugins(MenuPlugins)
+            .add_plugins((MenuPlugins, GameMenuPlugins))
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off);
     }

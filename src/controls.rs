@@ -1,105 +1,55 @@
-use bevy::{app::{App, Plugin}, ecs::{system::Resource, schedule::States}, a11y::accesskit::Action, input::keyboard::KeyCode};
-use bevy_controls::{resource::{PlayerActions, BindingConfig, Binding, InputType, AxisName, MouseInput, Controls}, contract::InputsContainer, plugin::ControlsPlugin};
-use bevy_controls_derive::{GameState, Action};
-use strum_macros::EnumIter;
+use bevy::{
+    app::{App, Plugin, Update},
+    ecs::{
+        schedule::{NextState, State},
+        system::{Res, ResMut},
+    },
+    input::keyboard::KeyCode,
+};
+use bevy_controls::{
+    contract::InputsContainer,
+    plugin::ControlsPlugin,
+    resource::{
+        Binding, BindingCondition, BindingConfig, Controls, InputType },
+};
 
-#[derive(PartialEq, Eq, Hash, EnumIter, Clone, Copy, Debug, Action)]
-pub enum CoreAction {
-    Forward,
-    Back,
-    Left,
-    Right,
-    Up,
-    Down,
-    MouseHorizontal,
-    MouseVertical,
-}
-
-#[derive(States, PartialEq, Eq, Clone, Hash, Debug, Default, GameState)]
-pub enum CoreGameState {
-    Arena,
-    #[default]
-    Hub,
-}
-
-#[derive(Resource, Default, Clone, Debug)]
-pub struct Lobby {
-    // When the game does not provide multiplayer, one field is enough
-    player_inputs: PlayerActions<CoreAction>,
-}
-
-impl InputsContainer<CoreAction> for Lobby {
-    fn iter_inputs<'a>(&'a self) -> Box<dyn Iterator<Item = &'a PlayerActions<CoreAction>> + 'a> {
-        todo!()
-    }
-
-    fn me<'a>(&'a self) -> Option<&'a PlayerActions<CoreAction>> {
-        Some(&self.player_inputs)
-    }
-
-    fn me_mut<'a>(&'a mut self) -> Option<&'a mut PlayerActions<CoreAction>> {
-        Some(&mut self.player_inputs)
-    }
-}
+use crate::{ui::{GameMenuActionState, MouseGrabState}, core::{CoreAction, Lobby, CoreGameState}};
 
 /// Main plugin of the game
 pub struct ControlsPlugins;
 
 impl Plugin for ControlsPlugins {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            ControlsPlugin::<CoreAction, Lobby, CoreGameState>::new(
+        app.add_systems(Update, in_game_menu)
+            .add_plugins((ControlsPlugin::<CoreAction, Lobby, CoreGameState>::new(
                 Controls::<CoreAction, CoreGameState>::new()
                     .with(
-                        CoreAction::Left,
+                        CoreAction::InGameMenu,
                         BindingConfig::from_vec(vec![Binding::from_single(InputType::Keyboard(
-                            KeyCode::KeyA,
-                        ))]),
-                    )
-                    .with(
-                        CoreAction::Back,
-                        BindingConfig::from_vec(vec![Binding::from_single(InputType::Keyboard(
-                            KeyCode::KeyS,
-                        ))]),
-                    )
-                    .with(
-                        CoreAction::Forward,
-                        BindingConfig::from_vec(vec![Binding::from_single(InputType::Keyboard(
-                            KeyCode::KeyW,
-                        ))]),
-                    )
-                    .with(
-                        CoreAction::Right,
-                        BindingConfig::from_vec(vec![Binding::from_single(InputType::Keyboard(
-                            KeyCode::KeyD,
-                        ))]),
-                    )
-                    .with(
-                        CoreAction::Up,
-                        BindingConfig::from_bind(Binding::from_single(InputType::Keyboard(
-                            KeyCode::Space,
-                        ))),
-                    )
-                    .with(
-                        CoreAction::MouseHorizontal,
-                        BindingConfig::from_bind(Binding::from_single(InputType::Mouse(
-                            MouseInput::Axis(AxisName::Horizontal),
-                        ))),
-                    )
-                    .with(
-                        CoreAction::MouseVertical,
-                        BindingConfig::from_bind(Binding::from_single(InputType::Mouse(
-                            MouseInput::Axis(AxisName::Vertical),
-                        ))),
-                    )
-                    .with(
-                        CoreAction::Down,
-                        BindingConfig::from_bind(Binding::from_single(InputType::Keyboard(
-                            KeyCode::ShiftLeft,
-                        ))),
+                            KeyCode::Escape,
+                        ))
+                        .with_condition(BindingCondition::InGameState(CoreGameState::InGame))]),
                     )
                     .build(),
-            ),
-        ));
+            ),));
+    }
+}
+
+fn in_game_menu(
+    inputs_container: Res<Lobby>,
+    mut next_state_mouse_grab: ResMut<NextState<MouseGrabState>>,
+    mouse_grab_state: Res<State<MouseGrabState>>,
+    mut next_state_game_menu_action: ResMut<NextState<GameMenuActionState>>,
+    game_menu_action: Res<State<GameMenuActionState>>,
+) {
+    let player_inputs = inputs_container.me().expect("This is bad");
+
+    if player_inputs
+        .get_just_pressed(CoreAction::InGameMenu)
+        .unwrap_or(false)
+    {
+        log::debug!("escape");
+        next_state_game_menu_action.set(game_menu_action.get().clone().toggle());
+        next_state_mouse_grab.set(mouse_grab_state.get().clone().toggle());
     }
 }

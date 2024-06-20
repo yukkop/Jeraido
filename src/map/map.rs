@@ -9,12 +9,14 @@ use crate::world::SpawnPoint;
 pub enum MapState {
     #[default]
     Menu = 0,
+    Arena,
 }
 
 impl Display for MapState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MapState::Menu => write!(f, "Menu"),
+            MapState::Arena => write!(f, "Arena"),
         }
     }
 }
