@@ -4,9 +4,9 @@ use std::time::SystemTime;
 use crate::actor::character::{spawn_character, spawn_tied_camera, TiedCamera};
 use crate::actor::UnloadActorsEvent;
 use crate::component::{DespawnReason, Respawn};
-use crate::core::CoreAction;
+use crate::core::CoreGameState;
 use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
-use crate::map::{is_loaded, MapState};
+use crate::map::is_loaded;
 use crate::world::{LinkId, Me, SpawnPoint};
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
@@ -17,17 +17,14 @@ use bevy::ecs::system::{Query, Res, ResMut};
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::log::info;
 use bevy::prelude::{in_state, Color, Commands, IntoSystemConfigs, OnEnter};
-use bevy::transform::components::Transform;
-use bevy_controls::resource::PlayerActions;
 use bevy_renet::transport::NetcodeServerPlugin;
 use bevy_renet::RenetServerPlugin;
 use renet::transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig};
 use renet::{ConnectionConfig, DefaultChannel, RenetServer, ServerEvent};
 
 use super::{
-    ChangeMapLobbyEvent, Character, HostResource, Lobby,
-    MapLoaderState, PlayerTransportData, PlayerView, TransportDataResource,
-    PROTOCOL_ID,
+    ChangeMapLobbyEvent, Character, HostResource, Lobby, MapCode, MapLoaderState,
+    PlayerTransportData, PlayerView, TransportDataResource, PROTOCOL_ID,
 };
 
 #[derive(Debug, Event)]
@@ -47,7 +44,6 @@ impl Plugin for HostLobbyPlugins {
                 Update,
                 (
                     send_change_map,
-                    // server_sync_actor,
                     spawn_projectile,
                     despawn_actor,
                 )
@@ -128,7 +124,7 @@ fn setup(
     commands.insert_resource(server);
     commands.insert_resource(transport);
 
-    change_map_event.send(ChangeMapLobbyEvent(MapState::Menu));
+    change_map_event.send(ChangeMapLobbyEvent(MapCode::Known(CoreGameState::Hub)));
 }
 
 pub fn load_processing(
@@ -140,7 +136,7 @@ pub fn load_processing(
     mut character_respawn_query: Query<&mut Respawn, With<Character>>,
     mut next_state_map: ResMut<NextState<MapLoaderState>>,
 ) {
-    info!("LoadProcessing: {:#?}", spawn_point);
+    log::info!("LoadProcessing: {:#?}", spawn_point);
     if is_loaded(&spawn_point) {
         if query.get_single().is_err() {
             // spawn host character
@@ -153,15 +149,11 @@ pub fn load_processing(
                 .id();
             commands.spawn_tied_camera(player_entity);
 
-            // TODO:
-            //lobby_res.players.insert(
-            //    PlayerId::HostOrSingle,
-            //    PlayerData {
-            //        entity: player_entity,
-            //        color,
-            //        username: host_resource.username.clone().unwrap(),
-            //    },
-            //);
+            lobby_res.me = PlayerData::new(
+                player_entity,
+                color,
+                host_resource.username.clone().unwrap(),
+            );
         }
 
         for mut respawn in character_respawn_query.iter_mut() {
@@ -176,12 +168,13 @@ pub fn load_processing(
 pub fn send_change_map(
     mut change_map_event: EventReader<ChangeMapLobbyEvent>,
     mut server: ResMut<RenetServer>,
-    mut next_state_map: ResMut<NextState<MapState>>,
+    // mut next_state_map: ResMut<NextState<MapState>>,
     mut unload_actors_event: EventWriter<UnloadActorsEvent>,
 ) {
     for ChangeMapLobbyEvent(state) in change_map_event.read() {
-        next_state_map.set(*state);
-        let message = bincode::serialize(&ServerMessages::ChangeMap { map_state: *state }).unwrap();
+        // next_state_map.set(*state);
+        let message =
+            bincode::serialize(&ServerMessages::ChangeMap { /*map_state: *state*/ }).unwrap();
         server.broadcast_message(DefaultChannel::ReliableOrdered, message);
 
         unload_actors_event.send(UnloadActorsEvent);
@@ -220,7 +213,7 @@ pub fn server_update_system(
     mut server: ResMut<RenetServer>,
     transport: Res<NetcodeServerTransport>,
     spawn_point: Res<SpawnPoint>,
-    map_state: ResMut<State<MapState>>,
+    //map_state: ResMut<State<MapState>>,
 
     //mut input_query: Query<&mut PlayerInputs>,
 ) {
@@ -232,7 +225,7 @@ pub fn server_update_system(
                 // TODO remove
                 let message = bincode::serialize(&ServerMessages::InitConnection {
                     id: *client_id,
-                    map_state: *map_state.get(),
+                    //map_state: *map_state.get(),
                 })
                 .unwrap();
                 server.send_message(*client_id, DefaultChannel::ReliableOrdered, message);
@@ -300,7 +293,7 @@ pub fn server_update_system(
         let mut first = true;
         while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
         {
-            //let input: Inputs = bincode::deserialize(&message).unwrap();
+            // let input: Inputs = bincode::deserialize(&message).unwrap();
             if let Some(player_data) = lobby.players.get(&PlayerId::Client(client_id)) {
                 // TODO:
                 // if let Ok(mut player_input) = input_query.get_mut(player_data.entity()) {

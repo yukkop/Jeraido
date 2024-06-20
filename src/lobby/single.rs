@@ -1,8 +1,8 @@
-use crate::{actor::{UnloadActorsEvent, character::{spawn_character, spawn_tied_camera, TiedCamera}}, world::SpawnPoint};
+use crate::{actor::{UnloadActorsEvent, character::{spawn_character, spawn_tied_camera, TiedCamera}}, world::SpawnPoint, core::CoreGameState};
 use crate::component::{DespawnReason, Respawn};
 use crate::lobby::host::generate_player_color;
 use crate::lobby::LobbyState;
-use crate::map::{is_loaded, MapState};
+use crate::map::is_loaded;
 use crate::world::Me;
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
@@ -14,7 +14,7 @@ use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::{in_state, Commands, IntoSystemConfigs, OnEnter};
 use log::info;
 
-use super::{ChangeMapLobbyEvent, Character, MapLoaderState, PlayerId};
+use super::{ChangeMapLobbyEvent, Character, MapLoaderState, PlayerId, MapCode};
 
 pub struct SingleLobbyPlugins;
 
@@ -32,7 +32,7 @@ impl Plugin for SingleLobbyPlugins {
 }
 
 fn setup(mut map_events: ResMut<Events<ChangeMapLobbyEvent>>) {
-    map_events.send(ChangeMapLobbyEvent(MapState::Arena));
+    map_events.send(ChangeMapLobbyEvent(MapCode::Known(CoreGameState::Hub)));
 }
 
 pub fn load_processing(
@@ -65,13 +65,14 @@ pub fn load_processing(
     }
 }
 
+// TODO:
 pub fn change_map(
     mut change_map_event: EventReader<ChangeMapLobbyEvent>,
-    mut next_state_map: ResMut<NextState<MapState>>,
+    //mut next_state_map: ResMut<NextState<MapState>>,
     mut unload_actors_event: EventWriter<UnloadActorsEvent>,
 ) {
     for ChangeMapLobbyEvent(state) in change_map_event.read() {
-        next_state_map.set(*state);
+        //next_state_map.set(*state);
 
         unload_actors_event.send(UnloadActorsEvent);
     }

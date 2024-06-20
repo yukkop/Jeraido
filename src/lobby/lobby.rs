@@ -1,5 +1,4 @@
-use crate::core::CoreAction;
-use crate::map::MapState;
+use crate::core::{CoreAction, CoreGameState};
 use crate::world::LinkId;
 use bevy::app::{App, Plugin};
 use bevy::ecs::event::Event;
@@ -12,7 +11,6 @@ use renet::transport::NETCODE_USER_DATA_BYTES;
 use renet::ClientId;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use super::client::ClientLobbyPlugins;
 use super::host::HostLobbyPlugins;
@@ -57,7 +55,7 @@ pub enum ServerMessages {
     /// * `map_state` - Initial state of the client's map.
     InitConnection {
         id: ClientId,
-        map_state: MapState,
+        //map_state: MapState,
     },
     /// Sent to notify a change in the map's state.
     ///
@@ -65,7 +63,7 @@ pub enum ServerMessages {
     ///
     /// * `map_state` - The new state of the map.
     ChangeMap {
-        map_state: MapState,
+        //map_state: MapState,
     },
     /// Indicates that a player has connected to the server.
     ///
@@ -273,8 +271,15 @@ impl PlayerView {
     }
 }
 
+#[derive(Debug)]
+pub enum MapCode {
+  Url(String),
+  Path(String),
+  Known(CoreGameState),
+}
+
 #[derive(Debug, Event)]
-pub struct ChangeMapLobbyEvent(pub MapState);
+pub struct ChangeMapLobbyEvent(pub MapCode);
 
 pub struct LobbyPlugins;
 

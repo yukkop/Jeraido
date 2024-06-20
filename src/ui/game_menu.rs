@@ -1,5 +1,4 @@
 use crate::lobby::{ChangeMapLobbyEvent, LobbyState};
-use crate::map::MapState;
 use crate::settings::{ApplySettings, ExemptSettings, Settings};
 use crate::ui::{rich_text, TRANSPARENT};
 use crate::util::i18n::Uniq::Module;
@@ -81,7 +80,7 @@ fn menu(
     mut next_state_ui: ResMut<NextState<UiState>>,
     mut next_state_game_menu_action: ResMut<NextState<GameMenuActionState>>,
     mut next_state_menu_window: ResMut<NextState<WindowState>>,
-    mut next_state_map: ResMut<NextState<MapState>>,
+    //mut next_state_map: ResMut<NextState<MapState>>,
     mut context: EguiContexts,
     mut state: ResMut<EguiState>,
     ui_frame_rect: ResMut<ViewportRect>,
@@ -133,7 +132,7 @@ fn menu(
                 next_state_game_menu_action.set(GameMenuActionState::Disable);
                 next_state_menu_window.set(WindowState::None);
                 next_state_lobby.set(LobbyState::None);
-                next_state_map.set(MapState::Menu);
+                //next_state_map.set(MapState::Menu);
                 next_state_ui.set(UiState::Menu);
             }
         });

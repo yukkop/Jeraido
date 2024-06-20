@@ -4,7 +4,6 @@ use std::time::SystemTime;
 use crate::actor::character::{spawn_character_shell, spawn_tied_camera, TiedCamera};
 use crate::actor::UnloadActorsEvent;
 use crate::lobby::{LobbyState, PlayerId};
-use crate::map::MapState;
 use crate::world::{LinkId, Me};
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
@@ -120,7 +119,7 @@ pub fn client_sync_players(
     mut transport_data: ResMut<TransportDataResource>,
     mut lobby: ResMut<Lobby>,
     mut own_id: ResMut<OwnId>,
-    mut next_state_map: ResMut<NextState<MapState>>,
+    //mut next_state_map: ResMut<NextState<MapState>>,
     lincked_obj_query: Query<(Entity, &LinkId)>,
     mut unload_actors_event: EventWriter<UnloadActorsEvent>,
 ) {
@@ -128,16 +127,16 @@ pub fn client_sync_players(
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let server_message = bincode::deserialize(&message).unwrap();
         match server_message {
-            ServerMessages::InitConnection { id, map_state } => {
-                next_state_map.set(map_state);
+            ServerMessages::InitConnection { id, /*map_state*/ } => {
+                //next_state_map.set(map_state);
                 if own_id.0.is_some() {
                     panic!("Yeah, I knew it. The server only had to initialize me once. Redo it, you idiot.");
                 } else {
                     *own_id = OwnId(Some(id));
                 }
             }
-            ServerMessages::ChangeMap { map_state } => {
-                next_state_map.set(map_state);
+            ServerMessages::ChangeMap { /*map_state*/ } => {
+                //next_state_map.set(map_state);
                 unload_actors_event.send(UnloadActorsEvent);
             }
             ServerMessages::PlayerConnected {

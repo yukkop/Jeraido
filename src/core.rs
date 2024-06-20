@@ -17,7 +17,6 @@ pub enum CoreGameState {
     Hub,
 }
 
-
 /// Main plugin of the game
 pub struct CorePlugins;
 

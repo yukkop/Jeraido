@@ -1,13 +1,13 @@
-use crate::ui::MainCamera;
+use crate::{ui::MainCamera, core::CoreGameState};
 
-use super::MapState;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-#[derive(Component)]
-struct Affiliation;
+use super::Affiliation;
 
 const PRIMARY_CAMERA_ORDER: isize = 3;
+
+const HUB_CODE: &str = "this is hub epta";
 
 #[derive(Component)]
 struct OrbitLight {
@@ -20,12 +20,12 @@ pub struct HubPlugins;
 
 impl Plugin for HubPlugins {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(MapState::Menu), load)
+        app.add_systems(OnEnter(CoreGameState::Hub), load)
             .add_systems(
                 Update,
-                update_light_position.run_if(in_state(MapState::Menu)),
+                update_light_position.run_if(in_state(CoreGameState::Hub)),
             )
-            .add_systems(OnExit(MapState::Menu), unload);
+            .add_systems(OnExit(CoreGameState::Hub), unload);
     }
 }
 
@@ -46,7 +46,7 @@ fn load(
             },
             MainCamera,
         ))
-        .insert(Affiliation);
+        .insert(Affiliation(HUB_CODE.into()));
 
     commands
         .spawn((
@@ -65,7 +65,7 @@ fn load(
                 angle: 0.0,
             },
         ))
-        .insert(Affiliation);
+        .insert(Affiliation(HUB_CODE.into()));
 
     commands
         .spawn((
@@ -77,7 +77,7 @@ fn load(
             },
             Name::new("Terrain"),
         ))
-        .insert(Affiliation);
+        .insert(Affiliation(HUB_CODE.into()));
 
     commands
         .spawn((
@@ -89,7 +89,7 @@ fn load(
             },
             Name::new("Cube"),
         ))
-        .insert(Affiliation);
+        .insert(Affiliation(HUB_CODE.into()));
 }
 
 fn unload(mut commands: Commands, affiliation_query: Query<Entity, With<Affiliation>>) {

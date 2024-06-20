@@ -867,6 +867,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_gltf_components"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7ae31d0e0a111b003f42f44f504ed24153f1341c1989a4e418bdb52da7b6b88"
+dependencies = [
+ "bevy",
+ "ron",
+ "serde",
+]
+
+[[package]]
 name = "bevy_hierarchy"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5226,6 +5237,7 @@ dependencies = [
  "bevy_controls_derive",
  "bevy_editor_pls",
  "bevy_egui 0.27.1",
+ "bevy_gltf_components",
  "bevy_kira_audio",
  "bevy_rapier3d",
  "bevy_renet",
