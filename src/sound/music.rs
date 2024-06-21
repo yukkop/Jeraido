@@ -3,11 +3,10 @@ use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::time::Duration;
 
-use crate::settings::ApplySettings;
+use crate::{settings::ApplySettings, core::{CoreGameState, AudioAssets}};
 
 const MINIMAL_DELAY: f32 = 15.;
 const MAXIMAL_DELAY: f32 = 90.;
-const MENU_MUSIC_PATH: &str = "lightslategray_blue.wav";
 
 #[derive(Default, Resource, Deref, DerefMut)]
 struct MusicTimer(Timer);
@@ -25,19 +24,18 @@ impl Plugin for MusicPlugins {
     fn build(&self, app: &mut App) {
         app.init_resource::<MenuMusic>()
             .init_resource::<MusicTimer>()
-            .add_systems(Startup, setup)
-            .add_systems(Update, play_music);
+            .add_systems(OnExit(CoreGameState::PrimaryLoad), setup)
+            .add_systems(Update, play_music.run_if(in_state(CoreGameState::Hub)));
     }
 }
 
 fn setup(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut menu_music: ResMut<MenuMusic>,
+    audio_assets: Res<AudioAssets>
 ) {
     commands.insert_resource(MusicTimer(Timer::from_seconds(0.0, TimerMode::Repeating)));
-    let audio_source: Handle<AudioSource> = asset_server.load(MENU_MUSIC_PATH);
-    menu_music.source_handle = audio_source;
+    menu_music.source_handle = audio_assets.background.clone();
 }
 
 fn play_music(
