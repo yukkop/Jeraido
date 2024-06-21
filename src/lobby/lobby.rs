@@ -1,4 +1,4 @@
-use crate::core::{CoreAction, CoreGameState};
+use crate::core::{CoreAction, CoreGameState, KnownLevel};
 use crate::world::LinkId;
 use bevy::app::{App, Plugin};
 use bevy::ecs::event::Event;
@@ -271,15 +271,16 @@ impl PlayerView {
     }
 }
 
+// TODO: to core.rs
 #[derive(Debug)]
-pub enum MapCode {
+pub enum LevelCode {
   Url(String),
   Path(String),
-  Known(CoreGameState),
+  Known(KnownLevel),
 }
 
 #[derive(Debug, Event)]
-pub struct ChangeMapLobbyEvent(pub MapCode);
+pub struct ChangeMapLobbyEvent(pub LevelCode);
 
 pub struct LobbyPlugins;
 

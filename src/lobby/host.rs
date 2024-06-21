@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use crate::actor::character::{spawn_character, spawn_tied_camera, TiedCamera};
 use crate::actor::UnloadActorsEvent;
 use crate::component::{DespawnReason, Respawn};
-use crate::core::CoreGameState;
+use crate::core::{CoreGameState, KnownLevel};
 use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
 use crate::map::is_loaded;
 use crate::world::{LinkId, Me, SpawnPoint};
@@ -23,7 +23,7 @@ use renet::transport::{NetcodeServerTransport, ServerAuthentication, ServerConfi
 use renet::{ConnectionConfig, DefaultChannel, RenetServer, ServerEvent};
 
 use super::{
-    ChangeMapLobbyEvent, Character, HostResource, Lobby, MapCode, MapLoaderState,
+    ChangeMapLobbyEvent, Character, HostResource, Lobby, LevelCode, MapLoaderState,
     PlayerTransportData, PlayerView, TransportDataResource, PROTOCOL_ID,
 };
 
@@ -124,7 +124,7 @@ fn setup(
     commands.insert_resource(server);
     commands.insert_resource(transport);
 
-    change_map_event.send(ChangeMapLobbyEvent(MapCode::Known(CoreGameState::Hub)));
+    change_map_event.send(ChangeMapLobbyEvent(LevelCode::Known(KnownLevel::Hub)));
 }
 
 pub fn load_processing(

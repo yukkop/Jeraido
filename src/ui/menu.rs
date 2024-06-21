@@ -1,4 +1,5 @@
-use crate::lobby::{ClientResource, HostResource, LobbyState};
+use crate::core::{LoadLevelEvent, KnownLevel};
+use crate::lobby::{ClientResource, HostResource, LobbyState, LevelCode};
 use crate::settings::{ApplySettings, ExemptSettings, Settings};
 use crate::ui::{rich_text, TRANSPARENT};
 use crate::util::i18n::Uniq::Module;
@@ -77,6 +78,7 @@ fn menu(
     mut windows: Query<&Window>,
     mut next_state_lobby: ResMut<NextState<LobbyState>>,
     mut nex_state_mouse_grab: ResMut<NextState<MouseGrabState>>,
+    mut load_level_event: EventWriter<LoadLevelEvent>,
 ) {
     let ctx = context.ctx_mut();
 
@@ -102,17 +104,14 @@ fn menu(
         .movable(false)
         .show(ctx, |ui| {
             if ui
-                .button(rich_text(
-                    "Shooting range".to_string(),
-                    Module(&MODULE),
-                    &font,
-                ))
+                .button(rich_text("Start".to_string(), Module(&MODULE), &font))
                 .clicked()
             {
                 nex_state_mouse_grab.set(MouseGrabState::Enable);
                 next_state_ui.set(UiState::GameMenu);
 
-                next_state_lobby.set(LobbyState::Single);
+                //next_state_lobby.set(LobbyState::Single);
+                load_level_event.send(LoadLevelEvent(LevelCode::Path("".into())));
             }
             if ui
                 .button(rich_text("Multiplayer".to_string(), Module(&MODULE), &font))

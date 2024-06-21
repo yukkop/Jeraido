@@ -5,7 +5,7 @@ use bevy::window::CursorGrabMode;
 use bevy_egui::egui::FontId;
 use std::sync::Arc;
 
-use super::GameMenuPlugins;
+use super::{GameMenuPlugins, DebugUiPlugins};
 
 #[derive(Debug, Clone, Copy, Resource, PartialEq, Deref, DerefMut)]
 pub struct ViewportRect(egui::Rect);
@@ -60,7 +60,7 @@ impl Plugin for UiPlugins {
             .insert_state(UiState::default())
             .insert_state(MouseGrabState::default())
             .init_resource::<ViewportRect>()
-            .add_plugins((MenuPlugins, GameMenuPlugins))
+            .add_plugins((MenuPlugins, GameMenuPlugins, DebugUiPlugins))
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off);
     }
@@ -73,9 +73,13 @@ pub fn frame_rect(mut windows: Query<&Window>, mut ui_frame_rect: ResMut<Viewpor
     ui_frame_rect.set(egui::Rect::from_min_size(Default::default(), window_size));
 }
 
-pub fn rich_text(text: impl Into<Arc<String>>, uniq: Uniq, font: &FontId) -> egui::RichText {
-    egui::RichText::new(trans(text.into(), uniq)).font(font.clone())
+pub fn rich_text(text: impl Into<Arc<String>>, uniq: Uniq, font: &FontId) -> egui::WidgetText {
+    egui::WidgetText::RichText(egui::RichText::new(trans(text.into(), uniq)).font(font.clone()))
 }
+
+//pub fn rich_text(text: impl Into<Arc<String>>, uniq: Uniq, font: &FontId) -> egui::RichText {
+//    egui::RichText::new(trans(text.into(), uniq)).font(font.clone())
+//}
 
 fn grab_mouse_on(mut windows: Query<&mut Window>) {
     let mut window = windows.single_mut();

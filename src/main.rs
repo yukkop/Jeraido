@@ -58,6 +58,7 @@ fn main() {
         };
         app.add_plugins((
             DefaultPlugins.set(window_plugin_override).set(asset_plugin),
+            EguiPlugin,
             RapierPhysicsPlugin::<NoUserData>::default(),
         ))
     }
@@ -73,7 +74,8 @@ fn main() {
         use bevy::window::PresentMode;
         use bevy::window::WindowResolution;
         use bevy_rapier3d::render::RapierDebugRenderPlugin;
-        use pih_pah_app::editor::EditorPlugins;
+        //use pih_pah_app::editor::EditorPlugins;
+        use bevy_inspector_egui::DefaultInspectorConfigPlugin;
 
         let window_plugin_override = WindowPlugin {
             primary_window: Some(Window {
@@ -81,7 +83,7 @@ fn main() {
                 resolution: WindowResolution::default(),
                 present_mode: PresentMode::AutoNoVsync,
                 // Tells wasm to resize the window according to the available canvas
-                fit_canvas_to_parent: true,
+                //fit_canvas_to_parent: true,
                 // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
                 prevent_default_event_handling: false,
                 ..default()
@@ -90,9 +92,11 @@ fn main() {
         };
         app.add_plugins((
             DefaultPlugins.set(window_plugin_override).set(asset_plugin),
+            EguiPlugin,
+            DefaultInspectorConfigPlugin,
             RapierPhysicsPlugin::<NoUserData>::default(),
             RapierDebugRenderPlugin::default(),
-            EditorPlugins::default(),
+            //EditorPlugins::default(),
         ));
     }
 
@@ -100,7 +104,7 @@ fn main() {
     // but we cannot use FixedUpdate because it is not supported by bevy_xpbd_3d as well as
     app
         .add_systems(Startup, set_window_icon)
-        .add_plugins((EguiPlugin, CorePlugins));
+        .add_plugins(CorePlugins);
 
     info!("Starting {APP_NAME} v{}", *VERSION);
 

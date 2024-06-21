@@ -1,4 +1,4 @@
-use crate::{actor::{UnloadActorsEvent, character::{spawn_character, spawn_tied_camera, TiedCamera}}, world::SpawnPoint, core::CoreGameState};
+use crate::{actor::{UnloadActorsEvent, character::{spawn_character, spawn_tied_camera, TiedCamera}}, world::SpawnPoint, core::{CoreGameState, KnownLevel}};
 use crate::component::{DespawnReason, Respawn};
 use crate::lobby::host::generate_player_color;
 use crate::lobby::LobbyState;
@@ -14,7 +14,7 @@ use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::{in_state, Commands, IntoSystemConfigs, OnEnter};
 use log::info;
 
-use super::{ChangeMapLobbyEvent, Character, MapLoaderState, PlayerId, MapCode};
+use super::{ChangeMapLobbyEvent, Character, MapLoaderState, PlayerId, LevelCode};
 
 pub struct SingleLobbyPlugins;
 
@@ -32,7 +32,7 @@ impl Plugin for SingleLobbyPlugins {
 }
 
 fn setup(mut map_events: ResMut<Events<ChangeMapLobbyEvent>>) {
-    map_events.send(ChangeMapLobbyEvent(MapCode::Known(CoreGameState::Hub)));
+    map_events.send(ChangeMapLobbyEvent(LevelCode::Known(KnownLevel::Hub)));
 }
 
 pub fn load_processing(

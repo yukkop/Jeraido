@@ -302,11 +302,11 @@ fn set_camera_viewport(
 }
 
 #[cfg(debug_assertions)]
-fn set_gizmo_mode(input: Res<Input<KeyCode>>, mut ui_state: ResMut<UiState>) {
+fn set_gizmo_mode(input: Res<ButtonInput<KeyCode>>, mut ui_state: ResMut<UiState>) {
     for (key, mode) in [
-        (KeyCode::R, GizmoMode::Rotate),
-        (KeyCode::G, GizmoMode::Translate),
-        (KeyCode::S, GizmoMode::Scale),
+        (KeyCode::KeyR, GizmoMode::Rotate),
+        (KeyCode::KeyG, GizmoMode::Translate),
+        (KeyCode::KeyS, GizmoMode::Scale),
     ] {
         if input.just_pressed(key) {
             ui_state.gizmo_mode = mode;
@@ -476,9 +476,9 @@ fn draw_gizmo(
             let model_matrix = transform.compute_matrix();
 
             let Some(result) = Gizmo::new(selected)
-                .model_matrix(model_matrix.to_cols_array_2d())
-                .view_matrix(view_matrix.to_cols_array_2d())
-                .projection_matrix(projection_matrix.to_cols_array_2d())
+                .model_matrix(model_matrix.to_cols_array_2d().into())
+                .view_matrix(view_matrix.to_cols_array_2d().into())
+                .projection_matrix(projection_matrix.to_cols_array_2d().into())
                 .orientation(GizmoOrientation::Local)
                 .mode(gizmo_mode)
                 .interact(ui)
