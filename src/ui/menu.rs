@@ -1,5 +1,5 @@
-use crate::core::{LoadLevelEvent, KnownLevel};
-use crate::lobby::{ClientResource, HostResource, LobbyState, LevelCode};
+use crate::core::{LoadLevelEvent};
+use crate::lobby::{ClientResource, HostResource, LevelCode, LobbyState};
 use crate::settings::{ApplySettings, ExemptSettings, Settings};
 use crate::ui::{rich_text, TRANSPARENT};
 use crate::util::i18n::Uniq::Module;
@@ -76,7 +76,7 @@ fn menu(
     mut exit: EventWriter<AppExit>,
     ui_frame_rect: ResMut<ViewportRect>,
     mut windows: Query<&Window>,
-    mut next_state_lobby: ResMut<NextState<LobbyState>>,
+    _next_state_lobby: ResMut<NextState<LobbyState>>,
     mut nex_state_mouse_grab: ResMut<NextState<MouseGrabState>>,
     mut load_level_event: EventWriter<LoadLevelEvent>,
 ) {

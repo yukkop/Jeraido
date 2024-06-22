@@ -13,17 +13,12 @@ lazy_static::lazy_static! {
 }
 
 #[derive(Resource)]
+#[derive(Default)]
 struct EguiState {
     is_active: bool,
 }
 
-impl Default for EguiState {
-    fn default() -> Self {
-        Self {
-            is_active: false,
-        }
-    }
-}
+
 
 #[derive(Default, Debug, Hash, States, PartialEq, Eq, Clone, Copy)]
 pub enum GameMenuActionState {
@@ -143,11 +138,11 @@ fn settings_window(
     mut next_state_menu_window: ResMut<NextState<WindowState>>,
     mut context: EguiContexts,
     mut settings: ResMut<Settings>,
-    mut state: ResMut<EguiState>,
+    _state: ResMut<EguiState>,
     lobby_state: Res<State<LobbyState>>,
     ui_frame_rect: ResMut<ViewportRect>,
     mut settings_applying: EventWriter<ApplySettings>,
-    mut change_map: EventWriter<ChangeMapLobbyEvent>,
+    _change_map: EventWriter<ChangeMapLobbyEvent>,
 ) {
     let frame_size = ui_frame_rect.max - ui_frame_rect.min;
 
@@ -187,8 +182,8 @@ fn settings_window(
                         Module(&MODULE),
                         &font,
                     ))
-                    .selected_text(format!(""))
-                    .show_ui(ui, |ui| {
+                    .selected_text(String::new())
+                    .show_ui(ui, |_ui| {
                         //ui.selectable_value(
                         //    &mut state.selected_map,
                         //    MapState::ShootingRange,
@@ -236,7 +231,7 @@ fn settings_window(
         });
 }
 
-fn exempt_setting(mut event: EventWriter<ExemptSettings>, mut state: ResMut<EguiState>) {
+fn exempt_setting(mut event: EventWriter<ExemptSettings>, _state: ResMut<EguiState>) {
     //state.selected_map = state.selected_map_applied;
     event.send(ExemptSettings);
 }

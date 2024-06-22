@@ -9,11 +9,14 @@ use bevy::{
 use bevy_controls::{
     contract::InputsContainer,
     plugin::ControlsPlugin,
-    resource::{
-        Binding, BindingCondition, BindingConfig, Controls, InputType },
+    resource::{Binding, BindingCondition, BindingConfig, Controls, InputType},
 };
 
-use crate::{ui::{GameMenuActionState, MouseGrabState}, core::{CoreAction, CoreGameState}, lobby::Lobby};
+use crate::{
+    core::{CoreAction, CoreGameState},
+    lobby::Lobby,
+    ui::{GameMenuActionState, MouseGrabState},
+};
 
 /// Main plugin of the game
 pub struct ControlsPlugins;

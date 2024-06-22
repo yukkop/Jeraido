@@ -1,4 +1,4 @@
-use crate::core::{CoreAction, CoreGameState, KnownLevel};
+use crate::core::{CoreAction, KnownLevel};
 use crate::world::LinkId;
 use bevy::app::{App, Plugin};
 use bevy::ecs::event::Event;
@@ -165,11 +165,11 @@ impl InputsContainer<CoreAction> for Lobby {
         todo!()
     }
 
-    fn me<'a>(&'a self) -> Option<&'a PlayerActions<CoreAction>> {
+    fn me(&self) -> Option<&PlayerActions<CoreAction>> {
         Some(&self.me.inputs)
     }
 
-    fn me_mut<'a>(&'a mut self) -> Option<&'a mut PlayerActions<CoreAction>> {
+    fn me_mut(&mut self) -> Option<&mut PlayerActions<CoreAction>> {
         Some(&mut self.me.inputs)
     }
 }
@@ -182,6 +182,8 @@ pub enum PlayerId {
 }
 
 impl PlayerId {
+    // TODO: forgoten realization
+    #[allow(dead_code)]
     pub fn client_id(&self) -> Option<ClientId> {
         match self {
             PlayerId::HostOrSingle => None,
@@ -199,31 +201,31 @@ pub struct PlayerData {
 }
 
 impl PlayerData {
-  pub fn new(entity: Entity, color: Color, username: String) -> PlayerData {
-      PlayerData {
-        entity: Some(entity),
-        color, 
-        username,
-        inputs: PlayerActions::<CoreAction>::default(),
-      }
-  }
-
-  pub fn entity(&self) -> Entity {
-    match self.entity {
-      Some(entity) => entity,
-      None => panic!(),
+    pub fn new(entity: Entity, color: Color, username: String) -> PlayerData {
+        PlayerData {
+            entity: Some(entity),
+            color,
+            username,
+            inputs: PlayerActions::<CoreAction>::default(),
+        }
     }
-  }
+
+    pub fn entity(&self) -> Entity {
+        match self.entity {
+            Some(entity) => entity,
+            None => panic!(),
+        }
+    }
 }
 
 impl Default for PlayerData {
     fn default() -> Self {
-      PlayerData {
-        entity: None,
-        color: Color::RED, 
-        username: "noname".into(),
-        inputs: PlayerActions::<CoreAction>::default(),
-      }
+        PlayerData {
+            entity: None,
+            color: Color::RED,
+            username: "noname".into(),
+            inputs: PlayerActions::<CoreAction>::default(),
+        }
     }
 }
 
@@ -274,9 +276,9 @@ impl PlayerView {
 // TODO: to core.rs
 #[derive(Debug)]
 pub enum LevelCode {
-  Url(String),
-  Path(String),
-  Known(KnownLevel),
+    Url(String),
+    Path(String),
+    Known(KnownLevel),
 }
 
 #[derive(Debug, Event)]
@@ -291,10 +293,6 @@ impl Plugin for LobbyPlugins {
             .insert_state(MapLoaderState::default())
             .init_resource::<HostResource>()
             .init_resource::<ClientResource>()
-            .add_plugins((
-                HostLobbyPlugins,
-                SingleLobbyPlugins,
-                ClientLobbyPlugins,
-            ));
+            .add_plugins((HostLobbyPlugins, SingleLobbyPlugins, ClientLobbyPlugins));
     }
 }

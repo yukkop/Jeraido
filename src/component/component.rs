@@ -56,6 +56,7 @@ impl Respawn {
     /// * `reason` - A container of reasons why the entity might be respawned.
     /// * `spawn_point` - The location where the entity will respawn.
     /// * `untouched_on_spawn` - Duration for which the entity remains in [`noclip`](CollisionLayer::ActorNoclip) mode upon respawn.
+    #[allow(dead_code)]
     pub fn new<T: IntoDespawnTypeVec>(
         reason: T,
         spawn_point: SpawnPoint,
@@ -79,6 +80,7 @@ impl Respawn {
     /// ```
     /// let respawn = Respawn::from_vec3(Vec3::new(0.0, 0.0, 0.0));
     /// ```
+    #[allow(dead_code)]
     pub fn from_vec3(spawn_point: Vec3) -> Self {
         Self {
             reason: vec![],
@@ -92,11 +94,13 @@ impl Respawn {
     /// # Arguments
     ///
     /// * `reason` - The [`DespawnReason`] to be added to the respawn reasons list.
+    #[allow(dead_code)]
     pub fn insert_reason(&mut self, reason: DespawnReason) {
         self.reason.push(reason);
     }
 
     /// Clears the current spawn point, resetting it to the default.
+    #[allow(dead_code)]
     pub fn clear_spawn_point(&mut self) {
         self.spawn_point = SpawnPoint::default();
     }
@@ -106,6 +110,7 @@ impl Respawn {
     /// # Arguments
     ///
     /// * `spawn_point` - The new spawn point for the entity.
+    #[allow(dead_code)]
     pub fn replase_spawn_point(&mut self, spawn_point: SpawnPoint) {
         self.spawn_point = spawn_point;
     }
@@ -130,6 +135,7 @@ impl Despawn {
     /// # Arguments
     ///
     /// * `reason` - The [`DespawnReason`] to be added to the respawn reasons list.
+    #[allow(dead_code)]
     pub fn insert_reason(&mut self, reason: DespawnReason) {
         self.reason.push(reason);
     }
@@ -228,7 +234,7 @@ fn respawn(
                 ;
         }
         transform.translation = respawn.spawn_point.random_point();
-        // TODO: 
+        // TODO:
         // if let Ok((mut linear_velocity, mut angular_velocity)) = velocity_query.get_mut(entity) {
         //     linear_velocity.0 = Vec3::ZERO;
         //     angular_velocity.0 = Vec3::ZERO;

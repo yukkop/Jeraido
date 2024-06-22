@@ -9,6 +9,7 @@ impl SpawnPoint {
         Self(spawn_points.into_vec3_vec())
     }
 
+    #[allow(dead_code)]
     pub fn empty() -> Self {
         Self(Vec::new())
     }
@@ -17,6 +18,7 @@ impl SpawnPoint {
         self.0.is_empty()
     }
 
+    #[allow(dead_code)]
     pub fn points(&self) -> &[Vec3] {
         &self.0
     }

@@ -3,7 +3,10 @@ use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::time::Duration;
 
-use crate::{settings::ApplySettings, core::{CoreGameState, AudioAssets}};
+use crate::{
+    core::{AudioAssets, CoreGameState},
+    settings::ApplySettings,
+};
 
 const MINIMAL_DELAY: f32 = 15.;
 const MAXIMAL_DELAY: f32 = 90.;
@@ -32,7 +35,7 @@ impl Plugin for MusicPlugins {
 fn setup(
     mut commands: Commands,
     mut menu_music: ResMut<MenuMusic>,
-    audio_assets: Res<AudioAssets>
+    audio_assets: Res<AudioAssets>,
 ) {
     commands.insert_resource(MusicTimer(Timer::from_seconds(0.0, TimerMode::Repeating)));
     menu_music.source_handle = audio_assets.background.clone();

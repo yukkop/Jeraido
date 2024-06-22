@@ -66,16 +66,14 @@ fn main() {
     #[cfg(not(feature = "dev"))]
     default_build(&mut app, asset_plugin);
 
-    #[cfg(debug_assertions)]
-    #[cfg(feature = "dev")]
+    #[cfg(all(debug_assertions, feature = "dev"))]
     if !*DEBUG {
         default_build(&mut app, asset_plugin);
     } else {
         use bevy::window::PresentMode;
         use bevy::window::WindowResolution;
         use bevy_rapier3d::render::RapierDebugRenderPlugin;
-        //use pih_pah_app::editor::EditorPlugins;
-        use bevy_inspector_egui::DefaultInspectorConfigPlugin;
+        use urmom::editor::EditorPlugins;
 
         let window_plugin_override = WindowPlugin {
             primary_window: Some(Window {
@@ -93,17 +91,15 @@ fn main() {
         app.add_plugins((
             DefaultPlugins.set(window_plugin_override).set(asset_plugin),
             EguiPlugin,
-            DefaultInspectorConfigPlugin,
             RapierPhysicsPlugin::<NoUserData>::default(),
             RapierDebugRenderPlugin::default(),
-            //EditorPlugins::default(),
+            EditorPlugins,
         ));
     }
 
     // it can be difficult to make physics undependent from the frame rate
     // but we cannot use FixedUpdate because it is not supported by bevy_xpbd_3d as well as
-    app
-        .add_systems(Startup, set_window_icon)
+    app.add_systems(Startup, set_window_icon)
         .add_plugins(CorePlugins);
 
     info!("Starting {APP_NAME} v{}", *VERSION);

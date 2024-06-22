@@ -10,17 +10,17 @@ macro_rules! extend_commands {
   ($command_name:ident($( $arg:ident: $arg_type:ty ),*), $command_fn:expr) => {
     #[allow(non_camel_case_types)]
     pub trait $command_name<'w, 's> {
-      fn $command_name<'a>(
-        &'a mut self,
+      fn $command_name(
+        &mut self,
         $($arg: $arg_type),*
-      ) -> EntityCommands<'a>;
+      ) -> EntityCommands<'_>;
     }
 
     impl<'w, 's> $command_name<'w, 's> for Commands<'w, 's> {
-      fn $command_name<'a>(
-        &'a mut self,
+      fn $command_name(
+        &mut self,
         $($arg: $arg_type),*
-      ) -> EntityCommands<'a> {
+      ) -> EntityCommands<'_> {
         let entity = self.spawn_empty();
         let entity_id = entity.id();
 

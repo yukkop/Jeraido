@@ -9,7 +9,7 @@ use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
 use bevy::ecs::event::EventWriter;
 use bevy::ecs::query::With;
-use bevy::ecs::schedule::{Condition, NextState, OnExit};
+use bevy::ecs::schedule::{Condition, OnExit};
 use bevy::ecs::system::{Query, Res, ResMut, Resource};
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::math::Vec3;
@@ -24,8 +24,7 @@ use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 pub struct OwnId(Option<ClientId>);
 
 use super::{
-    ClientResource, Lobby, PlayerData, ServerMessages, TransportDataResource,
-    Username, PROTOCOL_ID,
+    ClientResource, Lobby, PlayerData, ServerMessages, TransportDataResource, Username, PROTOCOL_ID,
 };
 
 pub struct ClientLobbyPlugins;
@@ -93,10 +92,10 @@ fn setup(mut commands: Commands) {
 }
 
 fn teardown(
-    mut commands: Commands,
-    tied_camera_query: Query<Entity, With<TiedCamera>>,
+    _commands: Commands,
+    _tied_camera_query: Query<Entity, With<TiedCamera>>,
     // char_query: Query<Entity, With<PlayerInputs>>,
-    mut unload_actors_event: EventWriter<UnloadActorsEvent>,
+    _unload_actors_event: EventWriter<UnloadActorsEvent>,
 ) {
     // TODO:
     //for entity in tied_camera_query.iter() {
@@ -178,7 +177,7 @@ pub fn client_sync_players(
                     }
                 }
             }
-            ServerMessages::ProjectileSpawn { id, color } => todo!(),
+            ServerMessages::ProjectileSpawn { id: _, color: _ } => todo!(),
         }
     }
 

@@ -1,23 +1,23 @@
 use crate::actor::ActorPlugins;
 use crate::component::ComponentPlugins;
-use crate::lobby::{LobbyPlugins, LobbyState};
 use crate::level::MapPlugins;
+use crate::lobby::{LobbyPlugins};
 use crate::settings::SettingsPlugins;
 use crate::sound::SoundPlugins;
 use crate::ui::UiPlugins;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use super::SpawnPoint;
+
 
 /// Enum representing collision layers for physics interactions.
 // TODO: #[derive(PhysicsLayer)]
-pub enum CollisionLayer {
-    /// Actors with this layer cannot collide with each other.
-    ActorNoclip,
-    /// The default collision layer.
-    Default,
-}
+//pub enum CollisionLayer {
+//    /// Actors with this layer cannot collide with each other.
+//    ActorNoclip,
+//    /// The default collision layer.
+//    Default,
+//}
 
 /// A component representing a promised GLTF scene.
 ///
@@ -52,13 +52,14 @@ pub enum LinkId {
 #[derive(Resource, Default, Reflect, Debug, Clone, Copy, PartialEq, Eq, Deref, DerefMut)]
 pub struct ProjectileIdSeq(usize);
 
-impl ProjectileIdSeq {
-    /// Returns the next projectile ID. A new ID is generated each time this method is called.
-    pub fn shift(&mut self) -> LinkId {
-        self.0 += 1;
-        LinkId::Projectile(self.0)
-    }
-}
+// TODO:
+//impl ProjectileIdSeq {
+//    /// Returns the next projectile ID. A new ID is generated each time this method is called.
+//    pub fn shift(&mut self) -> LinkId {
+//        self.0 += 1;
+//        LinkId::Projectile(self.0)
+//    }
+//}
 
 pub struct WorldPlugins;
 
@@ -74,13 +75,9 @@ impl Plugin for WorldPlugins {
                 LobbyPlugins,
                 ActorPlugins,
                 ComponentPlugins,
-      ));
+            ));
     }
 }
 
 #[derive(Component)]
 pub struct Me;
-
-fn init() {
-
-}

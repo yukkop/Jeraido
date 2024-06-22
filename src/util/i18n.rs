@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 const HASH_LENGTH: usize = 25;
 
+#[allow(dead_code)]
 pub enum Language {
     Ru,
     En,
@@ -13,6 +14,7 @@ lazy_static::lazy_static! {
     pub static ref LANGUAGE: Language = Language::En;
 }
 
+#[allow(dead_code)]
 pub enum Uniq {
     Module(&'static str),
     Id(&'static str),

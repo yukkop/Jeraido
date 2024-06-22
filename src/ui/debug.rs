@@ -32,6 +32,8 @@ pub enum DebugFrameState {
 }
 
 impl DebugFrameState {
+    // TODO: forgoten realization
+    #[allow(dead_code)]
     pub fn toggle(&mut self) -> Self {
         match self {
             DebugFrameState::Enable => *self = DebugFrameState::Disable,
@@ -49,6 +51,8 @@ pub enum DebugState {
 }
 
 impl DebugState {
+    // TODO: forgoten realization
+    #[allow(dead_code)]
     pub fn toggle(&mut self) -> Self {
         match self {
             DebugState::Enable => *self = DebugState::Disable,
@@ -72,8 +76,7 @@ pub struct DebugUiPlugins;
 
 impl Plugin for DebugUiPlugins {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<PlayerView>()
+        app.register_type::<PlayerView>()
             .register_type::<Respawn>()
             .add_event::<DebugMenuEvent>()
             .insert_state(DebugFrameState::default())
@@ -290,8 +293,8 @@ fn set_camera_viewport(
 
         let scale_factor = window.scale_factor() * egui_settings.scale_factor;
 
-        let viewport_pos = viewport_rect.left_top().to_vec2() * scale_factor as f32;
-        let viewport_size = viewport_rect.size() * scale_factor as f32;
+        let viewport_pos = viewport_rect.left_top().to_vec2() * scale_factor;
+        let viewport_size = viewport_rect.size() * scale_factor;
 
         cam.viewport = Some(Viewport {
             physical_position: UVec2::new(viewport_pos.x as u32, viewport_pos.y as u32),

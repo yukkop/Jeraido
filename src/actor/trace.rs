@@ -12,7 +12,7 @@ use bevy::{
     prelude::default,
     render::{
         color::Color,
-        mesh::{shape, Mesh},
+        mesh::Mesh,
     },
 };
 use bevy::{ecs::system::EntityCommands, prelude::*};
@@ -36,6 +36,7 @@ impl Trace {
     /// * `duration` - tracepoint lifetime
     /// * `intensity` - period of tracepoint spawn    
     /// * `color` - tracepoint color
+    #[allow(dead_code)]
     pub fn new(duration: f32, intensity: f32, color: Color) -> Self {
         Self {
             duration,
@@ -68,6 +69,7 @@ impl PhysicsOptimalTrace {
     /// * `intensity` - period of tracepoint spawn
     /// * `color` - tracepoint color
     /// * `offset` - if velocity is less than this value, tracepoint will not spawn
+    #[allow(dead_code)]
     pub fn new(duration: f32, intensity: f32, color: Color, offset: f32) -> Self {
         Self {
             duration,
@@ -102,6 +104,7 @@ impl TransformOptimalTrace {
     /// * `intensity` - period of tracepoint spawn
     /// * `color` - tracepoint color
     /// * `offset` - if velocity is less than this value, tracepoint will not spawn
+    #[allow(dead_code)]
     pub fn new(duration: f32, intensity: f32, color: Color, offset: f32) -> Self {
         Self {
             duration,
@@ -118,17 +121,20 @@ pub struct TraceTimer(Timer);
 
 impl TraceTimer {
     /// Creates a new [`TraceTimer`] with the specified duration.
+    #[allow(dead_code)]
     pub fn new(duration: f32) -> Self {
         Self(Timer::from_seconds(duration, TimerMode::Repeating))
     }
 
     /// Updates the timer.
+    #[allow(dead_code)]
     pub fn update(&mut self, delta: Duration) -> &mut Self {
         self.0.tick(delta);
         self
     }
 
     /// Returns `true` if the timer has finished.
+    #[allow(dead_code)]
     pub fn just_finished(&self) -> bool {
         self.0.just_finished()
     }
@@ -221,7 +227,7 @@ extend_commands!(
   |world: &mut World, entity_id: Entity, translation: Vec3, duration: f32, color: Color| {
     let mesh = world
         .resource_mut::<Assets<Mesh>>()
-        .add(Mesh::try_from(shape::Cube {size: 0.2}).unwrap());
+        .add(Mesh::from(Cuboid {half_size: Vec3::new(0.1, 0.1, 0.1)}));
     let material = world
         .resource_mut::<Assets<StandardMaterial>>()
         .add(StandardMaterial {

@@ -1,6 +1,6 @@
 use bevy::{gltf::Gltf, prelude::*};
 use bevy_asset_loader::prelude::*;
-use bevy_controls::{contract::InputsContainer, resource::PlayerActions};
+
 use bevy_controls_derive::{Action, GameState};
 use bevy_kira_audio::AudioSource;
 use strum_macros::EnumIter;
@@ -63,7 +63,8 @@ impl Plugin for CorePlugins {
                     )
                     .load_collection::<GameLevel>(),
             )
-            .add_plugins((WorldPlugins, ControlsPlugins));
+            .add_plugins((WorldPlugins, ControlsPlugins))
+            .add_systems(Update, load_level_event);
     }
 }
 
@@ -71,7 +72,7 @@ fn load_level_event(
     mut load_level_event: EventReader<LoadLevelEvent>,
     mut next_state: ResMut<NextState<CoreGameState>>,
 ) {
-    if let Some(event) = load_level_event.read().next() {
+    if let Some(_event) = load_level_event.read().next() {
         next_state.set(CoreGameState::LoadCustomLevel);
     }
 }

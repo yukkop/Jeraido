@@ -15,8 +15,6 @@ pub struct MapPlugins;
 
 impl Plugin for MapPlugins {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<SpawnPoint>()
-            .add_plugins(HubPlugins);
+        app.init_resource::<SpawnPoint>().add_plugins(HubPlugins);
     }
 }

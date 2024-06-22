@@ -1,4 +1,4 @@
-use crate::{ui::MainCamera, core::CoreGameState};
+use crate::{core::CoreGameState, ui::MainCamera};
 
 use bevy::prelude::*;
 use std::f32::consts::PI;
@@ -70,7 +70,7 @@ fn load(
     commands
         .spawn((
             PbrBundle {
-                mesh: mesh.add(Mesh::from(shape::Plane::from_size(5.0))),
+                mesh: mesh.add(Mesh::from(Plane3d::new(Vec3::Y))),
                 material: materials.add(Color::GREEN),
                 transform: Transform::from_xyz(0., 0., 0.),
                 ..Default::default()
@@ -82,7 +82,8 @@ fn load(
     commands
         .spawn((
             PbrBundle {
-                mesh: mesh.add(Mesh::from(shape::Cube::new(1.0))),
+                mesh: mesh
+      .add(Mesh::from(Cuboid::from_size(Vec3::new(0.5, 0.5, 0.5)))),
                 material: materials.add(Color::GRAY),
                 transform: Transform::from_xyz(0., 0.5, 0.),
                 ..Default::default()

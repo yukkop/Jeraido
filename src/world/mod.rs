@@ -1,9 +1,9 @@
 #![allow(clippy::module_inception)]
 
-mod world;
-mod spawn_point;
 mod camera;
+mod spawn_point;
+mod world;
 
-pub use world::*;
-pub use spawn_point::*;
 pub use camera::*;
+pub use spawn_point::*;
+pub use world::*;

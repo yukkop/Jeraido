@@ -78,4 +78,3 @@ impl Plugin for ComponentsTestPlugin {
             .register_type::<Vec<String>>();
     }
 }
-

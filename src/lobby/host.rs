@@ -4,18 +4,18 @@ use std::time::SystemTime;
 use crate::actor::character::{spawn_character, spawn_tied_camera, TiedCamera};
 use crate::actor::UnloadActorsEvent;
 use crate::component::{DespawnReason, Respawn};
-use crate::core::{CoreGameState, KnownLevel};
-use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
+use crate::core::{KnownLevel};
 use crate::level::is_loaded;
+use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
 use crate::world::{LinkId, Me, SpawnPoint};
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
 use bevy::ecs::event::{Event, EventReader, EventWriter};
 use bevy::ecs::query::With;
-use bevy::ecs::schedule::{Condition, NextState, OnExit, State};
+use bevy::ecs::schedule::{Condition, NextState, OnExit};
 use bevy::ecs::system::{Query, Res, ResMut};
 use bevy::hierarchy::DespawnRecursiveExt;
-use bevy::log::info;
+
 use bevy::prelude::{in_state, Color, Commands, IntoSystemConfigs, OnEnter};
 use bevy_renet::transport::NetcodeServerPlugin;
 use bevy_renet::RenetServerPlugin;
@@ -23,8 +23,7 @@ use renet::transport::{NetcodeServerTransport, ServerAuthentication, ServerConfi
 use renet::{ConnectionConfig, DefaultChannel, RenetServer, ServerEvent};
 
 use super::{
-    ChangeMapLobbyEvent, Character, HostResource, Lobby, LevelCode, MapLoaderState,
-    PlayerTransportData, PlayerView, TransportDataResource, PROTOCOL_ID,
+    ChangeMapLobbyEvent, Character, HostResource, LevelCode, Lobby, MapLoaderState, TransportDataResource, PROTOCOL_ID,
 };
 
 #[derive(Debug, Event)]
@@ -42,11 +41,7 @@ impl Plugin for HostLobbyPlugins {
             .add_systems(OnEnter(LobbyState::Host), setup)
             .add_systems(
                 Update,
-                (
-                    send_change_map,
-                    spawn_projectile,
-                    despawn_actor,
-                )
+                (send_change_map, spawn_projectile, despawn_actor)
                     .run_if(in_state(LobbyState::Host)),
             )
             .add_systems(
@@ -171,7 +166,7 @@ pub fn send_change_map(
     // mut next_state_map: ResMut<NextState<MapState>>,
     mut unload_actors_event: EventWriter<UnloadActorsEvent>,
 ) {
-    for ChangeMapLobbyEvent(state) in change_map_event.read() {
+    for ChangeMapLobbyEvent(_state) in change_map_event.read() {
         // next_state_map.set(*state);
         let message =
             bincode::serialize(&ServerMessages::ChangeMap { /*map_state: *state*/ }).unwrap();
@@ -290,11 +285,11 @@ pub fn server_update_system(
     }
 
     for client_id in server.clients_id().into_iter() {
-        let mut first = true;
-        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
+        let _first = true;
+        while let Some(_message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
         {
             // let input: Inputs = bincode::deserialize(&message).unwrap();
-            if let Some(player_data) = lobby.players.get(&PlayerId::Client(client_id)) {
+            if let Some(_player_data) = lobby.players.get(&PlayerId::Client(client_id)) {
                 // TODO:
                 // if let Ok(mut player_input) = input_query.get_mut(player_data.entity()) {
                 //     if first {

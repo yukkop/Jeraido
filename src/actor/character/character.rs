@@ -1,59 +1,60 @@
-use std::f32::consts::PI;
+
 
 use crate::component::{AxisName, DespawnReason, NoclipDuration, Respawn};
 use crate::extend_commands;
 use crate::lobby::Character;
 use crate::lobby::{LobbyState, PlayerId, PlayerView};
-use crate::world::SpawnPoint;
 use crate::world::MainCamera;
 use crate::world::Me;
+use crate::world::SpawnPoint;
 use bevy::{ecs::system::EntityCommands, prelude::*};
-use bevy_rapier3d::dynamics::Velocity;
+
 use serde::{Deserialize, Serialize};
 
-pub const PLAYER_MOVE_SPEED: f32 = 0.07;
-pub const PLAYER_SIZE: f32 = 2.0;
-const SHIFT_ACCELERATION: f32 = 2.0;
-const SENSITIVITY: f32 = 0.5;
-const JUMP_HEIGHT_MULTIPLICATOR: f32 = 1.1;
+//pub const PLAYER_MOVE_SPEED: f32 = 0.07;
+pub const PLAYER_SIZE: f32 = 2.;
+pub const HALPH_PLAYER_SIZE: f32 = PLAYER_SIZE / 2.;
+//const SHIFT_ACCELERATION: f32 = 2.0;
+//const SENSITIVITY: f32 = 0.5;
+//const JUMP_HEIGHT_MULTIPLICATOR: f32 = 1.1;
 
 const DEFAULT_CAMERA_DISTANCE: f32 = 20.;
 
 #[derive(Component, Debug, Serialize, Deserialize)]
 pub struct TiedCamera(Entity);
 
-#[derive(Component, Debug)]
-struct JumpHelper {
-    last_viable_normal: Vec3,
-}
+//#[derive(Component, Debug)]
+//struct JumpHelper {
+//    last_viable_normal: Vec3,
+//}
 
 pub struct CharacterPlugins;
 
 impl Plugin for CharacterPlugins {
     fn build(&self, app: &mut App) {
         app
-        // .add_systems(
-        //     FixedUpdate,
-        //     (move_characters, update_jump_normals).run_if(
-        //         not(in_state(LobbyState::None)).and_then(not(in_state(LobbyState::Client))),
-        //     ),
-        // )
-        // .add_systems(
-        //     Update,
-        //     (jump, rotate_camera).run_if(
-        //         not(in_state(LobbyState::None)).and_then(not(in_state(LobbyState::Client))),
-        //     ),
-        // )
-        // .add_systems(
-        //     Last,
-        //     fire.after(server_update_system).run_if(
-        //         not(in_state(LobbyState::None)).and_then(not(in_state(LobbyState::Client))),
-        //     ),
-        // )
-        .add_systems(
-            PostUpdate,
-            tied_camera_follow.run_if(not(in_state(LobbyState::None))),
-        );
+            .add_systems(
+                FixedUpdate,
+                move_characters/*, update_jump_normals*/.run_if(
+                    not(in_state(LobbyState::None)).and_then(not(in_state(LobbyState::Client))),
+                ),
+            )
+            .add_systems(
+                Update,
+                /*jump, */rotate_camera.run_if(
+                    not(in_state(LobbyState::None)).and_then(not(in_state(LobbyState::Client))),
+                ),
+            )
+            //.add_systems(
+            //    Last,
+            //    fire.after(server_update_system).run_if(
+            //        not(in_state(LobbyState::None)).and_then(not(in_state(LobbyState::Client))),
+            //    ),
+            //)
+            .add_systems(
+                PostUpdate,
+                tied_camera_follow.run_if(not(in_state(LobbyState::None))),
+            );
     }
 }
 
@@ -138,8 +139,7 @@ fn tied_camera_follow(
 //    }
 //}
 
-fn move_characters(
-    // mut query: Query<(&mut Velocity, &PlayerView, &PlayerInputs)>, /* , time: Res<Time> */
+fn move_characters(// mut query: Query<(&mut Velocity, &PlayerView, &PlayerInputs)>, /* , time: Res<Time> */
 ) {
     // TODO:
     //for (mut velocity, view_direction, input) in query.iter_mut() {
@@ -165,8 +165,7 @@ fn move_characters(
 }
 
 #[allow(clippy::type_complexity)]
-fn rotate_camera(
-    // TODO:
+fn rotate_camera(// TODO:
     //mut query: Query<(
     //    &mut PlayerView,
     //    &Transform,
@@ -198,8 +197,8 @@ fn rotate_camera(
     //    // let max_toi = 4.0;
     //    // let solid = true;
     //    // let filter = QueryFilter::default();
-    //    // //rapier_context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter) 
-    //    // 
+    //    // //rapier_context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter)
+    //    //
     //    // if let (Some(hits), Some(mut ray)) = (hits, ray) {
     //    //     let h = transform.rotation.conjugate();
     //    //     let start_point = h.mul_vec3(Vec3::Y * 2.);
@@ -209,7 +208,7 @@ fn rotate_camera(
     //    //         .normalize();
     //    //     ray.origin = start_point;
     //    //     ray.direction = offset;
-    //    // 
+    //    //
     //    //     if let Some(firs_hit) = hits.iter_sorted().next() {
     //    //         if firs_hit.time_of_impact < DEFAULT_CAMERA_DISTANCE {
     //    //             view.distance = firs_hit.time_of_impact;
@@ -226,14 +225,14 @@ extend_commands!(
     let mesh = world
       .resource_mut::<Assets<Mesh>>()
       // TODO: Have a resource with shared mesh list instead of adding meshes each time
-      .add(Mesh::from(shape::Cube { size: PLAYER_SIZE }));
+      .add(Mesh::from(Cuboid { half_size: Vec3::new(HALPH_PLAYER_SIZE, HALPH_PLAYER_SIZE, HALPH_PLAYER_SIZE) }));
     let material = world
       .resource_mut::<Assets<StandardMaterial>>()
       .add(color);
 
       // some raycast magic
-    let start_point = Vec3::Y * 2.;
-    let offset = Vec3::new(0., 0., DEFAULT_CAMERA_DISTANCE);
+    let _start_point = Vec3::Y * 2.;
+    let _offset = Vec3::new(0., 0., DEFAULT_CAMERA_DISTANCE);
 
     world
         .entity_mut(entity_id)
@@ -244,7 +243,7 @@ extend_commands!(
             ..Default::default()
             },
             // TODO: RayCaster::new(start_point, offset),
-            JumpHelper{last_viable_normal: Vec3::Y},
+            // TODO: JumpHelper{last_viable_normal: Vec3::Y},
             Respawn::new((
                 DespawnReason::More(200., AxisName::Y),
                 DespawnReason::Less(-10., AxisName::Y),
@@ -261,7 +260,7 @@ extend_commands!(
             Name::new(format!("Character:{:#?}", player_id)),
             // PhysicsOptimalTrace::new(0.5, 0.05, color, PLAYER_SIZE / 2.),
         ))
-        // TODO: 
+        // TODO:
         //.insert((
         //    Friction::new(0.4),
         //    PhysicsBundle::from_rigid_body(RigidBody::Dynamic),
@@ -278,7 +277,7 @@ extend_commands!(
     let mesh = world
       .resource_mut::<Assets<Mesh>>()
       // TODO: Have a resource with shared mesh list instead of adding meshes each time
-      .add(Mesh::from(shape::Cube { size: PLAYER_SIZE }));
+      .add(Mesh::from(Cuboid { half_size: Vec3::new(HALPH_PLAYER_SIZE, HALPH_PLAYER_SIZE, HALPH_PLAYER_SIZE) }));
     let material = StandardMaterial {
       base_color: color,
       ..default()

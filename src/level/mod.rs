@@ -1,7 +1,7 @@
 #![allow(clippy::module_inception)]
 
-mod hub;
 mod custom;
+mod hub;
 mod map;
 
 pub use map::*;

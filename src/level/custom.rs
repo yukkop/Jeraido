@@ -1,21 +1,19 @@
 use bevy::{
     app::{App, Plugin},
-    asset::{AssetEvent, Assets},
+    asset::{Assets},
     core::Name,
     ecs::{
         component::Component,
-        event::EventReader,
         reflect::ReflectComponent,
         schedule::OnEnter,
-        system::{Commands, Query, Res, ResMut},
+        system::{Commands, Query, Res},
     },
-    gltf::Gltf,
     reflect::Reflect,
     scene::SceneBundle,
     utils::default,
 };
 use bevy_gltf_components::ComponentsFromGltfPlugin;
-use hmac::digest::Update;
+
 
 use crate::{
     component::ComponentsTestPlugin,
