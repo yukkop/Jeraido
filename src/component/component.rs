@@ -3,7 +3,6 @@ use std::time::Duration;
 use bevy::app::{App, PreUpdate, Update};
 use bevy::ecs::entity::Entity;
 use bevy::ecs::event::EventWriter;
-use bevy::ecs::query::With;
 use bevy::ecs::system::{Commands, Query, Res};
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::{Component, Deref, DerefMut, Plugin, Vec3};
@@ -13,7 +12,7 @@ use bevy::transform::components::{GlobalTransform, Transform};
 
 use crate::component::AxisName;
 use crate::lobby::host::DespawnActorEvent;
-use crate::world::{CollisionLayer, LinkId, SpawnPoint};
+use crate::world::{LinkId, SpawnPoint};
 
 use super::despawn_type::{DespawnReason, IntoDespawnTypeVec};
 

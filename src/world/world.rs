@@ -1,7 +1,7 @@
 use crate::actor::ActorPlugins;
 use crate::component::ComponentPlugins;
 use crate::lobby::{LobbyPlugins, LobbyState};
-use crate::map::MapPlugins;
+use crate::level::MapPlugins;
 use crate::settings::SettingsPlugins;
 use crate::sound::SoundPlugins;
 use crate::ui::UiPlugins;

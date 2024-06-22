@@ -26,7 +26,7 @@ pub enum KnownLevel {
     Hub,
 }
 
-#[derive(Debug, Event)]
+#[derive(Debug, Event, Deref, DerefMut)]
 pub struct LoadLevelEvent(pub LevelCode);
 
 #[derive(AssetCollection, Resource)]

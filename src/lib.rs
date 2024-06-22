@@ -4,7 +4,7 @@ mod controls;
 mod component;
 mod lobby;
 mod util;
-mod map;
+mod level;
 mod actor;
 mod world;
 mod ui;

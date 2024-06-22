@@ -2,7 +2,7 @@ use crate::{actor::{UnloadActorsEvent, character::{spawn_character, spawn_tied_c
 use crate::component::{DespawnReason, Respawn};
 use crate::lobby::host::generate_player_color;
 use crate::lobby::LobbyState;
-use crate::map::is_loaded;
+use crate::level::is_loaded;
 use crate::world::Me;
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;

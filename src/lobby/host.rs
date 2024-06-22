@@ -6,7 +6,7 @@ use crate::actor::UnloadActorsEvent;
 use crate::component::{DespawnReason, Respawn};
 use crate::core::{CoreGameState, KnownLevel};
 use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
-use crate::map::is_loaded;
+use crate::level::is_loaded;
 use crate::world::{LinkId, Me, SpawnPoint};
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
