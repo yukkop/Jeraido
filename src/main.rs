@@ -7,6 +7,8 @@ use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use urmom::core::CorePlugins;
 use urmom::ASSET_DIR;
 use winit::window::Icon;
+#[cfg(all(debug_assertions, feature = "dev"))]
+use urmom::DEBUG;
 
 /// default value for logging
 ///
@@ -24,12 +26,6 @@ lazy_static::lazy_static! {
 
     /// The name of the application with the version
     pub static ref VERSIONED_APP_NAME: String = format!("{APP_NAME} v{}", *VERSION);
-}
-
-#[cfg(feature = "dev")]
-lazy_static::lazy_static! {
-    /// If the application is running in debug mode
-    pub static ref DEBUG: bool = std::env::var("DEBUG").is_ok();
 }
 
 fn main() {

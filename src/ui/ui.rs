@@ -5,7 +5,7 @@ use bevy::window::CursorGrabMode;
 use bevy_egui::egui::FontId;
 use std::sync::Arc;
 
-use super::{DebugUiPlugins, GameMenuPlugins};
+use super::GameMenuPlugins;
 
 #[derive(Debug, Clone, Copy, Resource, PartialEq, Deref, DerefMut)]
 pub struct ViewportRect(egui::Rect);
@@ -59,19 +59,52 @@ impl Plugin for UiPlugins {
         app.insert_state(UiState::default())
             .insert_state(MouseGrabState::default())
             .init_resource::<ViewportRect>()
-            .add_plugins((MenuPlugins, GameMenuPlugins, DebugUiPlugins))
+            .add_plugins((MenuPlugins, GameMenuPlugins))
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off)
+            // Not to friecventrly?
             .add_systems(Update, frame_rect);
     }
 }
 
+
 // TODO: forgoten realization, maybe reaction on window resize
-pub fn frame_rect(mut windows: Query<&Window>, mut ui_frame_rect: ResMut<ViewportRect>) {
+fn from_window(mut windows: Query<&Window>, mut ui_frame_rect: ResMut<ViewportRect>) {
     let window = windows.single_mut();
     let window_size = egui::vec2(window.width(), window.height());
 
     ui_frame_rect.set(egui::Rect::from_min_size(Default::default(), window_size));
+}
+
+#[cfg(not(all(debug_assertions, feature = "dev")))]
+pub fn frame_rect(
+    windows: Query<&Window>,
+    ui_frame_rect: ResMut<ViewportRect>,
+) {
+    from_window(windows, ui_frame_rect);
+}
+
+#[cfg(all(debug_assertions, feature = "dev"))]
+use { 
+  bevy_editor_pls::editor::Editor,
+  crate::DEBUG,
+};
+
+#[cfg(all(debug_assertions, feature = "dev"))]
+pub fn frame_rect(
+    windows: Query<&Window>,
+    editor: Res<Editor>,
+    mut ui_frame_rect: ResMut<ViewportRect>,
+) {
+    if !*DEBUG {
+      from_window(windows, ui_frame_rect);
+    } else {
+      if editor.active() {
+      ui_frame_rect.set(editor.viewport());
+    } else {
+      from_window(windows, ui_frame_rect);
+    }
+    }
 }
 
 pub fn rich_text(text: impl Into<Arc<String>>, uniq: Uniq, font: &FontId) -> egui::WidgetText {
