@@ -5,9 +5,8 @@ use crate::actor::character::{spawn_character, spawn_tied_camera, TiedCamera};
 use crate::actor::UnloadActorsEvent;
 use crate::component::{DespawnReason, Respawn};
 use crate::core::{KnownLevel};
-use crate::level::is_loaded;
 use crate::lobby::{LobbyState, PlayerData, PlayerId, ServerMessages, Username};
-use crate::world::{LinkId, Me, SpawnPoint};
+use crate::world::{LinkId, Me, SpawnProperty};
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
 use bevy::ecs::event::{Event, EventReader, EventWriter};
@@ -124,7 +123,7 @@ fn setup(
 
 pub fn load_processing(
     mut commands: Commands,
-    spawn_point: Res<SpawnPoint>,
+    spawn_point: Res<SpawnProperty>,
     mut lobby_res: ResMut<Lobby>,
     host_resource: Res<HostResource>,
     query: Query<(), With<Me>>,
@@ -132,7 +131,7 @@ pub fn load_processing(
     mut next_state_map: ResMut<NextState<MapLoaderState>>,
 ) {
     log::info!("LoadProcessing: {:#?}", spawn_point);
-    if is_loaded(&spawn_point) {
+    if !spawn_point.is_empty() {
         if query.get_single().is_err() {
             // spawn host character
             lobby_res.players_seq += 1;
@@ -207,7 +206,7 @@ pub fn server_update_system(
     mut lobby: ResMut<Lobby>,
     mut server: ResMut<RenetServer>,
     transport: Res<NetcodeServerTransport>,
-    spawn_point: Res<SpawnPoint>,
+    spawn_point: Res<SpawnProperty>,
     //map_state: ResMut<State<MapState>>,
 
     //mut input_query: Query<&mut PlayerInputs>,

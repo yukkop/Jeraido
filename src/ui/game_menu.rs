@@ -1,3 +1,4 @@
+use crate::core::CoreGameState;
 use crate::lobby::{ChangeMapLobbyEvent, LobbyState};
 use crate::settings::{ApplySettings, ExemptSettings, Settings};
 use crate::ui::{rich_text, TRANSPARENT};
@@ -6,7 +7,7 @@ use bevy::prelude::*;
 use bevy_egui::egui::Align2;
 use bevy_egui::{egui, EguiContexts};
 
-use super::{MouseGrabState, UiState, ViewportRect};
+use super::{MouseGrabState, ViewportRect};
 
 lazy_static::lazy_static! {
     static ref MODULE: &'static str = module_path!().splitn(3, ':').nth(2).unwrap_or(module_path!());
@@ -17,8 +18,6 @@ lazy_static::lazy_static! {
 struct EguiState {
     is_active: bool,
 }
-
-
 
 #[derive(Default, Debug, Hash, States, PartialEq, Eq, Clone, Copy)]
 pub enum GameMenuActionState {
@@ -54,13 +53,13 @@ impl Plugin for GameMenuPlugins {
             .add_systems(
                 Update,
                 menu.run_if(
-                    in_state(UiState::GameMenu).and_then(in_state(GameMenuActionState::Enable)),
+                    in_state(CoreGameState::InGame).and_then(in_state(GameMenuActionState::Enable)),
                 ),
             )
             .add_systems(
                 Update,
                 settings_window.run_if(
-                    in_state(UiState::GameMenu)
+                    in_state(CoreGameState::InGame)
                         .and_then(in_state(GameMenuActionState::Enable))
                         .and_then(in_state(WindowState::Settings)),
                 ),
@@ -72,7 +71,6 @@ impl Plugin for GameMenuPlugins {
 #[allow(clippy::too_many_arguments)]
 fn menu(
     mut next_state_lobby: ResMut<NextState<LobbyState>>,
-    mut next_state_ui: ResMut<NextState<UiState>>,
     mut next_state_game_menu_action: ResMut<NextState<GameMenuActionState>>,
     mut next_state_menu_window: ResMut<NextState<WindowState>>,
     //mut next_state_map: ResMut<NextState<MapState>>,
@@ -128,7 +126,6 @@ fn menu(
                 next_state_menu_window.set(WindowState::None);
                 next_state_lobby.set(LobbyState::None);
                 //next_state_map.set(MapState::Menu);
-                next_state_ui.set(UiState::Menu);
             }
         });
 }

@@ -12,9 +12,10 @@ use bevy::transform::components::{GlobalTransform, Transform};
 
 use crate::component::AxisName;
 use crate::lobby::host::DespawnActorEvent;
-use crate::world::{LinkId, SpawnPoint};
+use crate::world::{LinkId, SpawnProperty};
 
 use super::despawn_type::{DespawnReason, IntoDespawnTypeVec};
+use super::SpawnPlugin;
 
 /// A component representing respawn behavior for an entity.
 ///
@@ -25,7 +26,7 @@ pub struct Respawn {
     /// Reasons for respawning.
     reason: Vec<DespawnReason>,
     /// The spawn point for the entity.
-    spawn_point: SpawnPoint,
+    spawn_point: SpawnProperty,
     /// Duration for keeping the [`CollisionLayers`] into [`noclip`](CollisionLayer::ActorNoclip) [`CollisionLayer`] upon spawn.
     noclip: NoclipDuration,
 }
@@ -59,7 +60,7 @@ impl Respawn {
     #[allow(dead_code)]
     pub fn new<T: IntoDespawnTypeVec>(
         reason: T,
-        spawn_point: SpawnPoint,
+        spawn_point: SpawnProperty,
         untouched_on_spawn: NoclipDuration,
     ) -> Self {
         Self {
@@ -84,7 +85,7 @@ impl Respawn {
     pub fn from_vec3(spawn_point: Vec3) -> Self {
         Self {
             reason: vec![],
-            spawn_point: SpawnPoint::new(spawn_point),
+            spawn_point: SpawnProperty::new(spawn_point),
             noclip: NoclipDuration::None,
         }
     }
@@ -102,7 +103,7 @@ impl Respawn {
     /// Clears the current spawn point, resetting it to the default.
     #[allow(dead_code)]
     pub fn clear_spawn_point(&mut self) {
-        self.spawn_point = SpawnPoint::default();
+        self.spawn_point = SpawnProperty::default();
     }
 
     /// Replaces the current spawn point with a new one.
@@ -111,7 +112,7 @@ impl Respawn {
     ///
     /// * `spawn_point` - The new spawn point for the entity.
     #[allow(dead_code)]
-    pub fn replase_spawn_point(&mut self, spawn_point: SpawnPoint) {
+    pub fn replase_spawn_point(&mut self, spawn_point: SpawnProperty) {
         self.spawn_point = spawn_point;
     }
 }
@@ -145,7 +146,8 @@ pub struct ComponentPlugins;
 
 impl Plugin for ComponentPlugins {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, (respawn, despawn))
+        app.add_plugins(SpawnPlugin)
+            .add_systems(PreUpdate, (respawn, despawn))
             .add_systems(Update, noclip_timer);
     }
 }

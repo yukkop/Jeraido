@@ -1,10 +1,17 @@
-use bevy::{ecs::system::Resource, math::Vec3, prelude::Deref, reflect::Reflect};
+use bevy::{
+    ecs::system::Resource,
+    math::Vec3,
+    prelude::{Deref, DerefMut},
+    reflect::Reflect,
+};
+use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use rand::Rng;
 
-#[derive(Debug, Clone, Resource, Deref, Default, Reflect)]
-pub struct SpawnPoint(Vec<Vec3>);
+#[derive(Debug, Clone, Resource, InspectorOptions, Deref, DerefMut, Default, Reflect)]
+#[reflect(InspectorOptions)]
+pub struct SpawnProperty(Vec<Vec3>);
 
-impl SpawnPoint {
+impl SpawnProperty {
     pub fn new<T: IntoVec3Vec>(spawn_points: T) -> Self {
         Self(spawn_points.into_vec3_vec())
     }

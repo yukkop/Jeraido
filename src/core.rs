@@ -1,4 +1,4 @@
-use std::{path::Path, fs::OpenOptions, io::Write};
+use std::{fs::OpenOptions, io::Write, path::Path};
 
 use bevy::{gltf::Gltf, prelude::*};
 use bevy_asset_loader::prelude::*;
@@ -7,7 +7,12 @@ use bevy_controls_derive::{Action, GameState};
 use bevy_kira_audio::AudioSource;
 use strum_macros::EnumIter;
 
-use crate::{controls::ControlsPlugins, lobby::LevelCode, world::WorldPlugins, ASSET_DIR};
+use crate::{
+    controls::ControlsPlugins,
+    lobby::LevelCode,
+    world::WorldPlugins,
+    ASSET_DIR,
+};
 
 #[derive(PartialEq, Eq, Hash, EnumIter, Clone, Copy, Debug, Action)]
 pub enum CoreAction {
@@ -20,6 +25,7 @@ pub enum CoreGameState {
     PrimaryLoad,
     Hub,
     LoadCustomLevel,
+    LoadLobby,
     InGame,
 }
 
@@ -28,8 +34,16 @@ pub enum KnownLevel {
     Hub,
 }
 
-#[derive(Debug, Event, Deref, DerefMut, Clone)]
-pub struct LoadLevelEvent(pub LevelCode);
+#[derive(Debug, Event, Clone)]
+pub struct LoadLevelEvent {
+    pub level_code: LevelCode,
+}
+
+impl LoadLevelEvent {
+    pub fn new(level_code: LevelCode) -> Self {
+      LoadLevelEvent { level_code }
+    }
+}
 
 #[derive(AssetCollection, Resource)]
 pub struct GameLevel {
@@ -59,8 +73,7 @@ impl Plugin for CorePlugins {
             )
             .add_loading_state(
                 LoadingState::new(CoreGameState::LoadCustomLevel)
-
-                    .continue_to_state(CoreGameState::InGame)
+                    .continue_to_state(CoreGameState::LoadLobby)
                     .with_dynamic_assets_file::<StandardDynamicAssetCollection>(
                         "dynamic_map.assets.ron",
                     )
@@ -85,26 +98,32 @@ fn change_state_log(core_state: Res<State<CoreGameState>>) {
 fn load_level_event(
     mut load_level_event: EventReader<LoadLevelEvent>,
     mut next_state: ResMut<NextState<CoreGameState>>,
-) { 
+) {
     if let Some(event) = load_level_event.read().next() {
-        match &**event {
+        match &event.level_code {
             LevelCode::Path(path) => {
                 log::info!("load level: {}", path);
-                let path = Path::new(ASSET_DIR).join("level").join(format!("{path}.glb"));
+                let path = Path::new(ASSET_DIR)
+                    .join("level")
+                    .join(format!("{path}.glb"));
                 let path_ron = Path::new(ASSET_DIR).join("dynamic_map.assets.ron");
 
                 if path.exists() {
                     let mut file = OpenOptions::new()
                         .write(true)
                         .truncate(true)
-                        .open(path_ron).unwrap();
+                        .open(path_ron)
+                        .unwrap();
 
-                    file.write_all(br#"({
+                    file.write_all(
+                        br#"({
                        "level": File (
                           path: "level/Level1.glb",
                         ),
                     })
-                    "#).unwrap();
+                    "#,
+                    )
+                    .unwrap();
                     next_state.set(CoreGameState::LoadCustomLevel);
                 } else {
                     log::error!("{:#?} not exist in map folder", path);

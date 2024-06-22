@@ -6,7 +6,7 @@ use crate::lobby::Character;
 use crate::lobby::{LobbyState, PlayerId, PlayerView};
 use crate::world::MainCamera;
 use crate::world::Me;
-use crate::world::SpawnPoint;
+use crate::world::SpawnProperty;
 use bevy::{ecs::system::EntityCommands, prelude::*};
 
 use serde::{Deserialize, Serialize};
@@ -252,7 +252,7 @@ extend_commands!(
                 DespawnReason::More(100., AxisName::Z),
                 DespawnReason::Less(-100., AxisName::Z)
             ),
-            SpawnPoint::new(spawn_point),
+            SpawnProperty::new(spawn_point),
             NoclipDuration::Timer(10.)),
             // TODO: PlayerInputs::default(),
             Character { id: player_id },

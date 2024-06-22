@@ -1,4 +1,4 @@
-use crate::core::{LoadLevelEvent};
+use crate::core::{LoadLevelEvent, CoreGameState};
 use crate::lobby::{ClientResource, HostResource, LevelCode, LobbyState};
 use crate::settings::{ApplySettings, ExemptSettings, Settings};
 use crate::ui::{rich_text, TRANSPARENT};
@@ -9,7 +9,7 @@ use bevy::window::Window;
 use bevy_egui::egui::Align2;
 use bevy_egui::{egui, EguiContexts};
 
-use super::{MouseGrabState, UiState, ViewportRect};
+use super::{MouseGrabState, ViewportRect};
 
 lazy_static::lazy_static! {
     static ref MODULE: &'static str = module_path!().splitn(3, ':').nth(2).unwrap_or(module_path!());
@@ -53,31 +53,29 @@ impl Plugin for MenuPlugins {
     fn build(&self, app: &mut App) {
         app.init_resource::<State>()
             .insert_state(WindowState::default())
-            .add_systems(Update, menu.run_if(in_state(UiState::Menu)))
+            .add_systems(Update, menu.run_if(in_state(CoreGameState::Hub)))
             .add_systems(
                 Update,
                 settings_window
-                    .run_if(in_state(UiState::Menu).and_then(in_state(WindowState::Settings))),
+                    .run_if(in_state(CoreGameState::Hub).and_then(in_state(WindowState::Settings))),
             )
             .add_systems(OnExit(WindowState::Settings), exempt_setting)
             .add_systems(
                 Update,
                 multiplayer_window
-                    .run_if(in_state(UiState::Menu).and_then(in_state(WindowState::Multiplayer))),
+                    .run_if(in_state(CoreGameState::Hub).and_then(in_state(WindowState::Multiplayer))),
             );
     }
 }
 
 #[allow(clippy::too_many_arguments)]
 fn menu(
-    mut next_state_ui: ResMut<NextState<UiState>>,
     mut next_state_menu_window: ResMut<NextState<WindowState>>,
     mut context: EguiContexts,
     mut exit: EventWriter<AppExit>,
     ui_frame_rect: ResMut<ViewportRect>,
     mut windows: Query<&Window>,
-    _next_state_lobby: ResMut<NextState<LobbyState>>,
-    mut nex_state_mouse_grab: ResMut<NextState<MouseGrabState>>,
+    mut next_state_lobby: ResMut<NextState<LobbyState>>,
     mut load_level_event: EventWriter<LoadLevelEvent>,
 ) {
     let ctx = context.ctx_mut();
@@ -107,11 +105,11 @@ fn menu(
                 .button(rich_text("Start".to_string(), Module(&MODULE), &font))
                 .clicked()
             {
-                nex_state_mouse_grab.set(MouseGrabState::Enable);
-                next_state_ui.set(UiState::GameMenu);
 
-                //next_state_lobby.set(LobbyState::Single);
-                load_level_event.send(LoadLevelEvent(LevelCode::Path("Level1".into())));
+                next_state_lobby.set(LobbyState::Single);
+                load_level_event.send(LoadLevelEvent::new(
+                    LevelCode::Path("Level2".into()),
+                ));
             }
             if ui
                 .button(rich_text("Multiplayer".to_string(), Module(&MODULE), &font))
@@ -136,7 +134,6 @@ fn menu(
 
 #[allow(clippy::too_many_arguments)]
 fn multiplayer_window(
-    mut next_state_ui: ResMut<NextState<UiState>>,
     mut next_state_lobby: ResMut<NextState<LobbyState>>,
     mut next_state_menu_window: ResMut<NextState<WindowState>>,
     mut context: EguiContexts,
@@ -200,7 +197,6 @@ fn multiplayer_window(
                             Some(format!("0.0.0.0:{}", state.host_port.clone()));
                         host_resource.username = Some(state.username.clone());
                         next_state_menu_window.set(WindowState::None);
-                        next_state_ui.set(UiState::GameMenu);
 
                         next_state_lobby.set(LobbyState::Host);
                     }
@@ -232,7 +228,6 @@ fn multiplayer_window(
                         client_resource.username = Some(state.username.clone());
                         next_state_menu_window.set(WindowState::None);
                         state.multiplayer_state = MultiplayerState::Create;
-                        next_state_ui.set(UiState::GameMenu);
 
                         next_state_lobby.set(LobbyState::Client);
                     }

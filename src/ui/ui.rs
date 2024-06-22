@@ -1,3 +1,4 @@
+use crate::core::CoreGameState;
 use crate::ui::menu::MenuPlugins;
 use crate::util::i18n::{trans, Uniq};
 use bevy::prelude::*;
@@ -45,21 +46,15 @@ impl MouseGrabState {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-pub enum UiState {
-    #[default]
-    Menu,
-    GameMenu,
-}
-
 pub struct UiPlugins;
 
 impl Plugin for UiPlugins {
     fn build(&self, app: &mut App) {
-        app.insert_state(UiState::default())
+        app
             .insert_state(MouseGrabState::default())
             .init_resource::<ViewportRect>()
             .add_plugins((MenuPlugins, GameMenuPlugins))
+            .add_systems(OnEnter(CoreGameState::InGame), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off)
             // Not to friecventrly?

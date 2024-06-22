@@ -1,5 +1,5 @@
 use crate::component::{DespawnReason, Respawn};
-use crate::level::is_loaded;
+use crate::core::CoreGameState;
 use crate::lobby::host::generate_player_color;
 use crate::lobby::LobbyState;
 use crate::world::Me;
@@ -8,8 +8,8 @@ use crate::{
         character::{spawn_character, spawn_tied_camera, TiedCamera},
         UnloadActorsEvent,
     },
-    core::{KnownLevel},
-    world::SpawnPoint,
+    core::KnownLevel,
+    world::SpawnProperty,
 };
 use bevy::app::{App, Plugin, Update};
 use bevy::ecs::entity::Entity;
@@ -21,7 +21,7 @@ use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::{in_state, Commands, IntoSystemConfigs, OnEnter};
 use log::info;
 
-use super::{ChangeMapLobbyEvent, Character, LevelCode, MapLoaderState, PlayerId};
+use super::{ChangeMapLobbyEvent, Character, LevelCode, PlayerId};
 
 pub struct SingleLobbyPlugins;
 
@@ -29,11 +29,18 @@ impl Plugin for SingleLobbyPlugins {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(LobbyState::Single), setup)
             .add_systems(
-                Update,
-                load_processing
-                    .run_if(in_state(LobbyState::Single).and_then(in_state(MapLoaderState::No))),
+                OnEnter(CoreGameState::LoadLobby),
+                init_lobby.run_if(in_state(LobbyState::Single)),
             )
-            .add_systems(Update, change_map.run_if(in_state(LobbyState::Single)))
+            .add_systems(
+                OnEnter(CoreGameState::InGame),
+                load_processing.run_if(in_state(LobbyState::Single)),
+            )
+            .add_systems(
+                Update,
+                change_map
+                    .run_if(in_state(LobbyState::Single).and_then(in_state(CoreGameState::InGame))),
+            )
             .add_systems(OnExit(LobbyState::Single), teardown);
     }
 }
@@ -42,14 +49,19 @@ fn setup(mut map_events: ResMut<Events<ChangeMapLobbyEvent>>) {
     map_events.send(ChangeMapLobbyEvent(LevelCode::Known(KnownLevel::Hub)));
 }
 
+pub fn init_lobby(
+    mut next_state_core: ResMut<NextState<CoreGameState>>,
+) {
+        next_state_core.set(CoreGameState::InGame);
+}
+
 pub fn load_processing(
     mut commands: Commands,
-    spawn_point: Res<SpawnPoint>,
+    spawn_point: Res<SpawnProperty>,
     mut query: Query<&mut Respawn, With<Me>>,
-    mut next_state_map: ResMut<NextState<MapLoaderState>>,
 ) {
     info!("LoadProcessing: {:#?}", spawn_point);
-    if is_loaded(&spawn_point) {
+    if !spawn_point.is_empty() {
         match query.get_single_mut() {
             Err(_) => {
                 // spawn character fitst time
@@ -68,7 +80,8 @@ pub fn load_processing(
                 respawn.insert_reason(DespawnReason::Forced);
             }
         }
-        next_state_map.set(MapLoaderState::Yes);
+    } else {
+        log::error!("No spawn point on level");
     }
 }
 

@@ -17,7 +17,7 @@ use bevy_gltf_components::ComponentsFromGltfPlugin;
 
 use crate::{
     component::ComponentsTestPlugin,
-    core::{CoreGameState, GameLevel},
+    core::{CoreGameState, GameLevel}, world::SpawnProperty,
 };
 
 #[derive(Component, Reflect, Default, Debug)]
@@ -28,7 +28,7 @@ pub struct CustomPlugins;
 
 impl Plugin for CustomPlugins {
     fn build(&self, app: &mut App) {
-        app.add_plugins((ComponentsFromGltfPlugin::default(), ComponentsTestPlugin))
+        app.add_plugins(ComponentsFromGltfPlugin::default(),)
             .add_systems(OnEnter(CoreGameState::InGame), spawn_level);
     }
 }
@@ -39,6 +39,7 @@ fn spawn_level(
     model_assets: Res<GameLevel>,
     models: Res<Assets<bevy::gltf::Gltf>>,
 ) {
+    commands.insert_resource(SpawnProperty::empty());
     let gltf = models.get(model_assets.level.clone()).unwrap();
     if scene_markers.is_empty() {
         log::info!("spawning scene");
