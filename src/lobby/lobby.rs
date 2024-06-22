@@ -274,7 +274,7 @@ impl PlayerView {
 }
 
 // TODO: to core.rs
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum LevelCode {
     Url(String),
     Path(String),

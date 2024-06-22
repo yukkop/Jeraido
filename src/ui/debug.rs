@@ -32,8 +32,6 @@ pub enum DebugFrameState {
 }
 
 impl DebugFrameState {
-    // TODO: forgoten realization
-    #[allow(dead_code)]
     pub fn toggle(&mut self) -> Self {
         match self {
             DebugFrameState::Enable => *self = DebugFrameState::Disable,

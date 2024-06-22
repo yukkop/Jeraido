@@ -1,5 +1,6 @@
 ({
-    "level": File (
-        path: "model/Level1.glb",
-    ),
-})
+                       "level": File (
+                          path: "level/Level1.glb",
+                        ),
+                    })
+                    

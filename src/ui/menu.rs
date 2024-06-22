@@ -111,7 +111,7 @@ fn menu(
                 next_state_ui.set(UiState::GameMenu);
 
                 //next_state_lobby.set(LobbyState::Single);
-                load_level_event.send(LoadLevelEvent(LevelCode::Path("".into())));
+                load_level_event.send(LoadLevelEvent(LevelCode::Path("Level1".into())));
             }
             if ui
                 .button(rich_text("Multiplayer".to_string(), Module(&MODULE), &font))

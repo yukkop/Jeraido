@@ -1,4 +1,4 @@
-use crate::{core::CoreGameState, ui::MainCamera};
+use crate::{core::{CoreGameState, KnownLevel}, ui::MainCamera, lobby::LevelCode};
 
 use bevy::prelude::*;
 use std::f32::consts::PI;
@@ -6,8 +6,6 @@ use std::f32::consts::PI;
 use super::Affiliation;
 
 const PRIMARY_CAMERA_ORDER: isize = 3;
-
-const HUB_CODE: &str = "this is hub epta";
 
 #[derive(Component)]
 struct OrbitLight {
@@ -46,7 +44,7 @@ fn load(
             },
             MainCamera,
         ))
-        .insert(Affiliation(HUB_CODE.into()));
+        .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 
     commands
         .spawn((
@@ -65,7 +63,7 @@ fn load(
                 angle: 0.0,
             },
         ))
-        .insert(Affiliation(HUB_CODE.into()));
+        .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 
     commands
         .spawn((
@@ -77,7 +75,7 @@ fn load(
             },
             Name::new("Terrain"),
         ))
-        .insert(Affiliation(HUB_CODE.into()));
+        .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 
     commands
         .spawn((
@@ -90,7 +88,7 @@ fn load(
             },
             Name::new("Cube"),
         ))
-        .insert(Affiliation(HUB_CODE.into()));
+        .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 }
 
 fn unload(mut commands: Commands, affiliation_query: Query<Entity, With<Affiliation>>) {

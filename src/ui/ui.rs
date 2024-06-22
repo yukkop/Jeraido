@@ -67,7 +67,6 @@ impl Plugin for UiPlugins {
     }
 }
 
-
 // TODO: forgoten realization, maybe reaction on window resize
 fn from_window(mut windows: Query<&Window>, mut ui_frame_rect: ResMut<ViewportRect>) {
     let window = windows.single_mut();
@@ -77,18 +76,12 @@ fn from_window(mut windows: Query<&Window>, mut ui_frame_rect: ResMut<ViewportRe
 }
 
 #[cfg(not(all(debug_assertions, feature = "dev")))]
-pub fn frame_rect(
-    windows: Query<&Window>,
-    ui_frame_rect: ResMut<ViewportRect>,
-) {
+pub fn frame_rect(windows: Query<&Window>, ui_frame_rect: ResMut<ViewportRect>) {
     from_window(windows, ui_frame_rect);
 }
 
 #[cfg(all(debug_assertions, feature = "dev"))]
-use { 
-  bevy_editor_pls::editor::Editor,
-  crate::DEBUG,
-};
+use {crate::DEBUG, bevy_editor_pls::editor::Editor};
 
 #[cfg(all(debug_assertions, feature = "dev"))]
 pub fn frame_rect(
@@ -97,13 +90,13 @@ pub fn frame_rect(
     mut ui_frame_rect: ResMut<ViewportRect>,
 ) {
     if !*DEBUG {
-      from_window(windows, ui_frame_rect);
+        from_window(windows, ui_frame_rect);
     } else {
-      if editor.active() {
-      ui_frame_rect.set(editor.viewport());
-    } else {
-      from_window(windows, ui_frame_rect);
-    }
+        if editor.active() {
+            ui_frame_rect.set(editor.viewport());
+        } else {
+            from_window(windows, ui_frame_rect);
+        }
     }
 }
 

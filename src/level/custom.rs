@@ -24,9 +24,9 @@ use crate::{
 #[reflect(Component)]
 pub struct LoadedMarker;
 
-pub struct HubPlugins;
+pub struct CustomPlugins;
 
-impl Plugin for HubPlugins {
+impl Plugin for CustomPlugins {
     fn build(&self, app: &mut App) {
         app.add_plugins((ComponentsFromGltfPlugin::default(), ComponentsTestPlugin))
             .add_systems(OnEnter(CoreGameState::InGame), spawn_level);
