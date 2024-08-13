@@ -10,8 +10,8 @@ dev = []
 bevy = { verison = "0.13.2", default-features = false, features = ["bevy_ui", "bevy_winit", "bevy_gltf", "bevy_scene", "bevy_core_pipeline", "bevy_render", "bevy_pbr", "tonemapping_luts", "ktx2", "zstd", "multi-threaded" ] }
 bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls.git", rev = "d4c640a58d8f596bf97add8daa1300851ceda9d7" } # 2 commits affter "0.8.1", becouse infinity viewport rect fixed
 bevy_rapier3d = { version = "0.26.0", features = ["debug-render-3d"]}
-bevy_controls = { path = "../ex/bevy_controls/crate/bevy_controls" } 
-bevy_controls_derive = { path = "../ex/bevy_controls/crate/bevy_controls_derive" } 
+bevy_controls = { path = "../bevy_controls_13/crate/bevy_controls" } 
+bevy_controls_derive = { path = "../bevy_controls_13/crate/bevy_controls_derive" } 
 env_logger = "0.11.3"
 log = "0.4.21"
 strum_macros = "0.26.4"
