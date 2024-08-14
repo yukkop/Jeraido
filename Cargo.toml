@@ -1,10 +1,10 @@
 [package]
-name = "urmom"
+name = "jeraido"
 version = "0.1.0"
 edition = "2021"
 
 [features]
-dev = []
+devtools = []
 
 [dependencies]
 bevy = { verison = "0.13.2", default-features = false, features = ["bevy_ui", "bevy_winit", "bevy_gltf", "bevy_scene", "bevy_core_pipeline", "bevy_render", "bevy_pbr", "tonemapping_luts", "ktx2", "zstd", "multi-threaded" ] }
@@ -36,3 +36,7 @@ egui_dock = "0.11.0"
 egui-gizmo = "0.16.2"
 bevy_gltf_components = "0.5.1"
 bevy_asset_loader = { version = "0.20.2", features=["standard_dynamic_assets", "3d"] }
+
+#[workspace]
+#resolver = "2"
+#members = ["lib/*"]

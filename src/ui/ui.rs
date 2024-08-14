@@ -5,8 +5,12 @@ use bevy::prelude::*;
 use bevy::window::CursorGrabMode;
 use bevy_egui::egui::FontId;
 use std::sync::Arc;
+use bevy_editor_pls::editor::Editor;
 
 use super::GameMenuPlugins;
+
+#[cfg(all(debug_assertions, feature = "devtools"))]
+use crate::DEBUG;
 
 #[derive(Debug, Clone, Copy, Resource, PartialEq, Deref, DerefMut)]
 pub struct ViewportRect(egui::Rect);
@@ -56,9 +60,12 @@ impl Plugin for UiPlugins {
             .add_plugins((MenuPlugins, GameMenuPlugins))
             .add_systems(OnEnter(CoreGameState::InGame), grab_mouse_on)
             .add_systems(OnEnter(MouseGrabState::Enable), grab_mouse_on)
-            .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off)
-            // Not to friecventrly?
-            .add_systems(Update, frame_rect);
+            .add_systems(OnEnter(MouseGrabState::Disable), grab_mouse_off);
+        // FIXME: Not to friecventrly?
+        #[cfg(all(debug_assertions, feature = "devtools"))]
+        app.add_systems(Update, frame_rect.run_if(resource_exists::<Editor>));
+        #[cfg(not(all(debug_assertions, feature = "devtools")))]
+        app.add_systems(Update, frame_rect);
     }
 }
 
@@ -70,15 +77,12 @@ fn from_window(mut windows: Query<&Window>, mut ui_frame_rect: ResMut<ViewportRe
     ui_frame_rect.set(egui::Rect::from_min_size(Default::default(), window_size));
 }
 
-#[cfg(not(all(debug_assertions, feature = "dev")))]
+#[cfg(not(all(debug_assertions, feature = "devtools")))]
 pub fn frame_rect(windows: Query<&Window>, ui_frame_rect: ResMut<ViewportRect>) {
     from_window(windows, ui_frame_rect);
 }
 
-#[cfg(all(debug_assertions, feature = "dev"))]
-use {crate::DEBUG, bevy_editor_pls::editor::Editor};
-
-#[cfg(all(debug_assertions, feature = "dev"))]
+#[cfg(all(debug_assertions, feature = "devtools"))]
 pub fn frame_rect(
     windows: Query<&Window>,
     editor: Res<Editor>,

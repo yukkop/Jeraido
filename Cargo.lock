@@ -3016,6 +3016,41 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
+name = "jeraido"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_asset_loader",
+ "bevy_controls",
+ "bevy_controls_derive",
+ "bevy_editor_pls",
+ "bevy_egui",
+ "bevy_gltf_components",
+ "bevy_kira_audio",
+ "bevy_rapier3d",
+ "bevy_renet",
+ "bincode",
+ "egui",
+ "egui-gizmo",
+ "egui_dock",
+ "env_logger",
+ "hex",
+ "hmac",
+ "image 0.25.1",
+ "lazy_static",
+ "log",
+ "rand",
+ "renet",
+ "serde",
+ "serde_yaml",
+ "sha2",
+ "strum",
+ "strum_macros",
+ "winit",
+]
+
+[[package]]
 name = "jni"
 version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5120,41 +5155,6 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
-]
-
-[[package]]
-name = "urmom"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy-inspector-egui",
- "bevy_asset_loader",
- "bevy_controls",
- "bevy_controls_derive",
- "bevy_editor_pls",
- "bevy_egui",
- "bevy_gltf_components",
- "bevy_kira_audio",
- "bevy_rapier3d",
- "bevy_renet",
- "bincode",
- "egui",
- "egui-gizmo",
- "egui_dock",
- "env_logger",
- "hex",
- "hmac",
- "image 0.25.1",
- "lazy_static",
- "log",
- "rand",
- "renet",
- "serde",
- "serde_yaml",
- "sha2",
- "strum",
- "strum_macros",
- "winit",
 ]
 
 [[package]]
