@@ -1,6 +1,7 @@
 use crate::{core::{CoreGameState, KnownLevel}, ui::MainCamera, lobby::LevelCode};
+use voronoi::{voronoi, Point, make_polygons};
 
-use bevy::prelude::*;
+use bevy::{prelude::*, render::{mesh::{Indices, PrimitiveTopology}, render_asset::RenderAssetUsages}};
 use std::f32::consts::PI;
 
 use super::Affiliation;
@@ -27,11 +28,74 @@ impl Plugin for HubPlugins {
     }
 }
 
+fn make_mesh(polygon: Vec<Point>) -> Mesh {
+    // Given data: Vec<Point>
+    let points: Vec<Vec3> = polygon.into_iter().map(|e| {
+        Vec3 {x: e.x.0 as f32, y: 0., z: e.y.0 as f32}
+    }).collect();
+
+    // Ensure you have at least 3 points to form a plane
+    if points.len() < 3 {
+        panic!("Expected at least 3 points to form a plane");
+    }
+
+    // Calculate indices for a triangulated surface (assuming a convex polygon)
+    let mut indices = Vec::new();
+    for i in 1..points.len() - 1 {
+        indices.push(0 as u32);
+        indices.push(i as u32);
+        indices.push((i + 1) as u32);
+    }
+
+    // Generate a normal (assuming points lie on a plane)
+    let normal = (points[1] - points[0]).cross(points[2] - points[0]).normalize();
+    let normals = vec![normal; points.len()];
+
+    // Calculate UV coordinates (using a basic planar mapping technique)
+    let uvs: Vec<Vec2> = points
+        .iter()
+        .map(|p| Vec2::new(p.x, p.z)) // Assuming x and z are the primary plane axes
+        .collect();
+
+    let mut mesh = Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::RENDER_WORLD | RenderAssetUsages::MAIN_WORLD);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, points);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    mesh.insert_indices(Indices::U32(indices));
+    mesh
+}
+
 fn load(
     mut commands: Commands,
     mut mesh: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    const BOX_SIZE: f64 = 800.;
+    let vor_pts = vec![
+        Point::new(0.0, 1.0),
+        Point::new(2.0, 3.0),
+        Point::new(10.0, 12.0)
+    ];
+    let vor_diagram = voronoi(vor_pts, BOX_SIZE);
+    let vor_polys = make_polygons(&vor_diagram);
+     
+    for (index, vor_poly) in vor_polys.iter().enumerate() {
+      commands
+        .spawn((
+          PbrBundle {
+            mesh: mesh.add(make_mesh(vor_poly.clone())),
+            material: materials.add(Color::GRAY),
+            transform: Transform::from_xyz(0., 0., 0.),
+            ..Default::default()
+          },
+          Name::new(format!("Poly {}", index)),
+        ))
+        .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
+    }
+    
+
     // camera
     commands
         .spawn((

@@ -36,6 +36,7 @@ egui_dock = "0.11.0"
 egui-gizmo = "0.16.2"
 bevy_gltf_components = "0.5.1"
 bevy_asset_loader = { version = "0.20.2", features=["standard_dynamic_assets", "3d"] }
+voronoi = "0.1.4"
 
 #[workspace]
 #resolver = "2"
