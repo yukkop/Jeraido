@@ -22,7 +22,8 @@ The main character is thrown into a dungeon and is caught between revenge and fo
 ## Controls
 ### Share
 ### Mage
-  - `runic inscription` - `util`
+  - `inscript the rune` - `util`
+  - `ask the God` - `microphone`
 
 ## Game style
 
@@ -38,42 +39,35 @@ All the rest is procedural generated parts of dungeon
 Player will move on feet, no transport provided
 
 4 character with different main mecanic & conflict
- - **runic sourcer** - `inscript the runes` as main mecanic
+ - **Researcher** - `sneak` and `run` and `maps`
+   Разубедить в знаниниях
+   тяга к знаниям (истина ли то что я делаю)
+   
+ - **Runic sourcer** - `inscript the rune`
+   Разубедить в друзьях
+   месть / милосердие (справиться с предательством)
 
-#### Not playeble characters 
-##### Evil creature 
-###### Name
-  kaṇva |  evil (sanscrit)
+   помиловать/ убить/ спасти/ использовать
 
-#### Playeble characters 
-##### ?Rogue 
-  His live already possesed by shadows 
-  hi cannot give it an other demon
+   meta:
+   кажый выбор влиет на металочку и открывает связанную способность
 
-##### Kleric 
-###### Name
-  ?helilige | holiness (dutch) 
-###### About
-  See the trues (shows the invisible)
+ - **The servant of god** - 
+   Разубидить в вере
+   верность или отступничество (чей бог настоящий)
+   could not save her group (чувствует своб вину)
+   find all spirits of party members and apologize to them 
 
-##### Warior 
-###### Name
-  moed | valor (dutch) 
-
-##### Runic sourcer 
-###### Name
-  kennis van | knowledge (dutch)
-###### good ending
-  prove own knowledge
-###### bad ending 
-  to submit to the demon and believe that his knowledge is not given to him
+ - **Melee guy** - `shord sword and shield`
+   Разубедить убеждениях
+   верность долгу / трусость
 
 ## Systems & Mecanics
 
 ### Systems
 #### Shared
  - Movement
-#### Kleric
+#### The servant of God
  - can't fight
 
 ### Mecanics
@@ -82,4 +76,32 @@ Player will move on feet, no transport provided
 #### Kleric
  - stels
 #### Warrior
-  
+
+
+## Not playeble characters 
+### Evil creature 
+#### Name
+kaṇva |  evil (sanscrit)
+
+## Playeble characters 
+### ?Rogue 
+His live already possesed by shadows 
+hi cannot give it an other demon
+
+### The servant of God 
+#### Name
+?helilige | holiness (dutch) 
+#### About
+See the trues (shows the invisible)
+
+### Warior 
+#### Name
+moed | valor (dutch) 
+
+### Runic sourcer 
+#### Name
+kennis van | knowledge (dutch)
+#### good ending
+prove own knowledge
+#### bad ending 
+to submit to the demon and believe that his knowledge is not given to him

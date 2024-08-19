@@ -32,10 +32,12 @@ fn load(
     mut mesh: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    // camera
     commands
         .spawn((
             Camera3dBundle {
                 transform: Transform::from_xyz(5., 2.5, 5.).looking_at(Vec3::ZERO, Vec3::Y),
+                projection: Projection::Perspective(PerspectiveProjection::default()),
                 camera: Camera {
                     order: PRIMARY_CAMERA_ORDER,
                     ..default()
@@ -46,6 +48,7 @@ fn load(
         ))
         .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 
+    // light
     commands
         .spawn((
             PointLightBundle {
@@ -65,6 +68,7 @@ fn load(
         ))
         .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 
+    // plane
     commands
         .spawn((
             PbrBundle {
@@ -77,13 +81,14 @@ fn load(
         ))
         .insert(Affiliation(LevelCode::Known(KnownLevel::Hub)));
 
+    // cube
     commands
         .spawn((
             PbrBundle {
                 mesh: mesh
       .add(Mesh::from(Cuboid::from_size(Vec3::new(0.5, 0.5, 0.5)))),
                 material: materials.add(Color::GRAY),
-                transform: Transform::from_xyz(0., 0.5, 0.),
+                transform: Transform::from_xyz(0., 0.25, 0.),
                 ..Default::default()
             },
             Name::new("Cube"),
